@@ -1,0 +1,23 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2>Abonnement expiré ⚠️</h2>
+
+<p>Bonjour {{ user_name }},</p>
+
+<p>Votre abonnement au plan <strong>{{ plan_name }}</strong> a expiré.</p>
+
+<p>Pour continuer à profiter de toutes les fonctionnalités premium d'AutoTrack, renouvelez votre abonnement dès maintenant.</p>
+
+<p style="text-align: center;">
+    <a href="{{ renew_url }}" class="button">Renouveler mon abonnement</a>
+</p>
+
+<p style="color: #6b7280;">
+    Sans abonnement actif, votre compte est limité aux fonctionnalités gratuites de base.
+</p>
+
+<p>
+    L'équipe AutoTrack
+</p>
+{% endblock %}

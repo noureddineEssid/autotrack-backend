@@ -62,6 +62,8 @@ INSTALLED_APPS = [
     'settings_app',
     'ai_assistant',
     'health',
+    'emails',
+    'common',
 ]
 
 MIDDLEWARE = [
@@ -235,6 +237,47 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+
+# Celery Beat Schedule (Tâches périodiques)
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    # Vérifier les abonnements expirés tous les jours à 2h du matin
+    'check-expired-subscriptions': {
+        'task': 'subscriptions.check_expired_subscriptions',
+        'schedule': crontab(hour=2, minute=0),
+    },
+    # Envoyer les rappels de renouvellement tous les jours à 9h
+    'send-renewal-reminders': {
+        'task': 'subscriptions.send_renewal_reminders',
+        'schedule': crontab(hour=9, minute=0),
+    },
+    # Envoyer les rappels de maintenance tous les jours à 10h
+    'send-maintenance-reminders': {
+        'task': 'maintenances.send_maintenance_reminders',
+        'schedule': crontab(hour=10, minute=0),
+    },
+    # Nettoyer les vieux documents tous les dimanches à 3h
+    'cleanup-old-documents': {
+        'task': 'documents.cleanup_old_documents',
+        'schedule': crontab(hour=3, minute=0, day_of_week=0),
+    },
+    # Nettoyer les anciennes notifications tous les dimanches à 4h
+    'cleanup-old-notifications': {
+        'task': 'notifications.cleanup_old_notifications',
+        'schedule': crontab(hour=4, minute=0, day_of_week=0),
+    },
+    # Vérifier la santé du système toutes les heures
+    'check-system-health': {
+        'task': 'health.check_system_health',
+        'schedule': crontab(minute=0),  # Toutes les heures à 0 minutes
+    },
+    # Nettoyer les sessions inactives tous les jours à 1h
+    'cleanup-inactive-sessions': {
+        'task': 'users.cleanup_inactive_sessions',
+        'schedule': crontab(hour=1, minute=0),
+    },
+}
 
 # File Upload Settings
 MAX_UPLOAD_SIZE = config('MAX_UPLOAD_SIZE', default=10485760, cast=int)  # 10MB

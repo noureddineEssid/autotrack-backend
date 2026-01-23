@@ -1,0 +1,25 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2>Rappel de maintenance 🔧</h2>
+
+<p>Bonjour {{ user_name }},</p>
+
+<p>Un entretien de votre <strong>{{ vehicle_name }}</strong> approche!</p>
+
+<div style="background-color: #fef3c7; padding: 20px; border-left: 4px solid #f59e0b; border-radius: 4px; margin: 20px 0;">
+    <p style="margin: 0;"><strong>Type:</strong> {{ maintenance_type }}</p>
+    <p style="margin: 10px 0 0 0;"><strong>Date prévue:</strong> {{ scheduled_date }}</p>
+    <p style="margin: 10px 0 0 0;"><strong>Dans:</strong> {{ days_left }} jour(s)</p>
+</div>
+
+<p>N'oubliez pas de programmer votre rendez-vous avec votre garage!</p>
+
+<p style="text-align: center;">
+    <a href="{{ dashboard_url }}" class="button">Voir mes maintenances</a>
+</p>
+
+<p>
+    L'équipe AutoTrack
+</p>
+{% endblock %}

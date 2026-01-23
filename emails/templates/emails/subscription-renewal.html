@@ -1,0 +1,21 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<h2>Rappel de renouvellement 🔔</h2>
+
+<p>Bonjour {{ user_name }},</p>
+
+<p>Votre abonnement au plan <strong>{{ plan_name }}</strong> sera renouvelé le <strong>{{ renewal_date }}</strong>.</p>
+
+<p>Assurez-vous que vos informations de paiement sont à jour pour éviter toute interruption de service.</p>
+
+<p style="text-align: center;">
+    <a href="{{ manage_url }}" class="button">Gérer mon abonnement</a>
+</p>
+
+<p>Si vous souhaitez modifier ou annuler votre abonnement, vous pouvez le faire à tout moment depuis votre tableau de bord.</p>
+
+<p>
+    L'équipe AutoTrack
+</p>
+{% endblock %}
