@@ -12,6 +12,10 @@ class UserManager(BaseUserManager):
             raise ValueError('The Email field must be set')
         
         email = self.normalize_email(email)
+        # Set username to email if not provided
+        if 'username' not in extra_fields or not extra_fields.get('username'):
+            extra_fields['username'] = email
+        
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -41,6 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     ]
     
     email = models.EmailField(unique=True, db_index=True)
+    username = models.CharField(max_length=150, unique=True, blank=True, null=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     phone_number = models.CharField(max_length=20, blank=True, null=True)

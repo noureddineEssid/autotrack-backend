@@ -37,7 +37,7 @@ urlpatterns = [
     path('api/', include('webhooks.urls')),
     path('api/', include('settings_app.urls')),
     path('api/', include('ai_assistant.urls')),
-    path('api/statistics/', include('stats.urls')),
+    path('api/', include('stats.urls')),
     path('api/', include('reports.urls')),
     path('api/', include('reminders.urls')),
     path('api/', include('bookings.urls')),

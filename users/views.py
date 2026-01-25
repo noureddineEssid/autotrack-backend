@@ -76,25 +76,17 @@ class LoginView(APIView):
         
         user = serializer.validated_data['user']
         
-        # Generate JWT tokens
-        refresh = RefreshToken.for_user(user)
+        # Generate OTP for login verification
+        otp_code = create_otp_for_user(user)
         
-        # Create session
-        session = Session.objects.create(
-            user=user,
-            token=str(refresh.access_token),
-            refresh_token=str(refresh),
-            ip_address=self.get_client_ip(request),
-            user_agent=request.META.get('HTTP_USER_AGENT', ''),
-            expires_at=timezone.now() + timedelta(days=30)
-        )
+        # Send OTP email
+        email_service.send_otp_email(user, otp_code)
         
+        # Return OTP required response without tokens
         return Response({
-            'user': UserSerializer(user).data,
-            'tokens': {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
+            'requireOtp': True,
+            'email': user.email,
+            'message': 'OTP code sent to your email'
         })
     
     def get_client_ip(self, request):
@@ -293,13 +285,31 @@ class VerifyOtpView(APIView):
             user = User.objects.get(email=email)
             
             if verify_otp_for_user(user, otp_code):
-                # Mark user as verified
-                user.is_verified = True
-                user.save(update_fields=['is_verified'])
+                # Mark user email as verified
+                user.email_verified = True
+                user.save(update_fields=['email_verified'])
+                
+                # Generate JWT tokens after successful OTP verification
+                refresh = RefreshToken.for_user(user)
+                
+                # Create session
+                Session.objects.create(
+                    user=user,
+                    token=str(refresh.access_token),
+                    refresh_token=str(refresh),
+                    ip_address=self.get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                    expires_at=timezone.now() + timedelta(days=30)
+                )
                 
                 return Response({
                     'message': 'OTP verified successfully',
-                    'verified': True
+                    'verified': True,
+                    'user': UserSerializer(user).data,
+                    'tokens': {
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                    }
                 })
             else:
                 return Response({
@@ -309,6 +319,15 @@ class VerifyOtpView(APIView):
             return Response({
                 'error': 'User not found'
             }, status=status.HTTP_404_NOT_FOUND)
+    
+    def get_client_ip(self, request):
+        """Get client IP address"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
 
 
 class ResendOtpView(APIView):
@@ -329,11 +348,7 @@ class ResendOtpView(APIView):
             otp_code = create_otp_for_user(user)
             
             # Send OTP email
-            email_service.send_otp_email(
-                to_email=user.email,
-                user_name=user.first_name or user.email,
-                otp_code=otp_code
-            )
+            email_service.send_otp_email(user, otp_code)
             
             return Response({
                 'message': 'OTP sent successfully'

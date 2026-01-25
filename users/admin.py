@@ -7,14 +7,14 @@ from .models import User, Session
 class UserAdmin(BaseUserAdmin):
     """User admin"""
     
-    list_display = ['email', 'first_name', 'last_name', 'is_staff', 'is_active', 'email_verified', 'created_at']
+    list_display = ['email', 'username', 'first_name', 'last_name', 'is_staff', 'is_active', 'email_verified', 'created_at']
     list_filter = ['is_staff', 'is_active', 'email_verified', 'created_at']
-    search_fields = ['email', 'first_name', 'last_name']
+    search_fields = ['email', 'username', 'first_name', 'last_name']
     ordering = ['-created_at']
     
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal Info', {'fields': ('first_name', 'last_name', 'phone_number')}),
+        ('Personal Info', {'fields': ('username', 'first_name', 'last_name', 'phone_number')}),
         ('Stripe', {'fields': ('stripe_customer_id',)}),
         ('Verification', {'fields': ('email_verified', 'code_otp', 'expire_otp')}),
         ('Password Reset', {'fields': ('password_reset_token', 'password_reset_token_expiration')}),
@@ -25,7 +25,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'first_name', 'last_name', 'password1', 'password2'),
+            'fields': ('email', 'username', 'first_name', 'last_name', 'password1', 'password2'),
         }),
     )
     

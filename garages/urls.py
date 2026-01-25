@@ -7,6 +7,7 @@ app_name = 'garages'
 router = DefaultRouter()
 router.register(r'garages', GarageViewSet, basename='garage')
 router.register(r'reviews', GarageReviewViewSet, basename='review')
+router.register(r'recommended', GarageViewSet, basename='recommended')
 
 urlpatterns = [
     path('', include(router.urls)),
