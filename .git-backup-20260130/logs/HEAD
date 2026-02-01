@@ -1,8 +1,0 @@
-0000000000000000000000000000000000000000 effc8363cb0a89e700c9b9118cadc4a157e89ecd Noureddine ESSID <noureddinesid@gmail.com> 1769087742 +0100	commit (initial): first commit
-effc8363cb0a89e700c9b9118cadc4a157e89ecd 0000000000000000000000000000000000000000 Noureddine ESSID <noureddinesid@gmail.com> 1769087742 +0100	Branch: renamed refs/heads/main to refs/heads/main
-effc8363cb0a89e700c9b9118cadc4a157e89ecd effc8363cb0a89e700c9b9118cadc4a157e89ecd Noureddine ESSID <noureddinesid@gmail.com> 1769087742 +0100	Branch: renamed refs/heads/main to refs/heads/main
-effc8363cb0a89e700c9b9118cadc4a157e89ecd 26b98c2dd16cd0d1937a1b7dc5532067f930e18a Noureddine ESSID <noureddinesid@gmail.com> 1769087795 +0100	commit: First commit
-26b98c2dd16cd0d1937a1b7dc5532067f930e18a 88deaa63ae0c3eb51c513242b5aa27ffe3703309 Noureddine ESSID <noureddinesid@gmail.com> 1769091220 +0100	commit: feat: Configure CORS and add backend startup script
-88deaa63ae0c3eb51c513242b5aa27ffe3703309 c340591ac81e797cf44b5976ba7ce2bd5b64861c Noureddine ESSID <noureddinesid@gmail.com> 1769158073 +0100	commit: ✅ Backend: Ajout fonctionnalités manquantes (Email service, Celery tasks, OCR analyzer)
-c340591ac81e797cf44b5976ba7ce2bd5b64861c 364522635ebe7ea569a9bfc79e729219cb9bda67 Noureddine ESSID <noureddinesid@gmail.com> 1769201230 +0100	commit: feat: Add Statistics module with comprehensive analytics endpoints
-364522635ebe7ea569a9bfc79e729219cb9bda67 8c7f03c6819d99b0fc1bf99bda8a213ff7264b8c Noureddine ESSID <noureddinesid@gmail.com> 1769359145 +0100	commit: 🧹 Clean and optimize backend
