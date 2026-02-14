@@ -4,7 +4,7 @@ from .views import SubscriptionViewSet
 
 app_name = 'subscriptions'
 
-router = DefaultRouter()
+router = DefaultRouter(trailing_slash=False)
 router.register(r'subscriptions', SubscriptionViewSet, basename='subscription')
 
 urlpatterns = [

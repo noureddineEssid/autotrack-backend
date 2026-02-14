@@ -40,7 +40,7 @@ class VehicleStatsSerializer(serializers.Serializer):
     """Per-vehicle statistics"""
     vehicle_id = serializers.IntegerField()
     vehicle_name = serializers.CharField()
-    brand = serializers.CharField()
+    make = serializers.CharField()
     model = serializers.CharField()
     year = serializers.IntegerField()
     total_cost = serializers.DecimalField(max_digits=10, decimal_places=2)

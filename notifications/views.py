@@ -25,7 +25,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
     """
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['type', 'is_read']
+    filterset_fields = ['notification_type', 'is_read']
     search_fields = ['title', 'message']
     ordering_fields = ['created_at', 'read_at']
     ordering = ['-created_at']
@@ -109,7 +109,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification_type = request.query_params.get('type')
         
         if notification_type:
-            queryset = self.get_queryset().filter(type=notification_type)
+            queryset = self.get_queryset().filter(notification_type=notification_type)
         else:
             queryset = self.get_queryset()
         
@@ -124,7 +124,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         total = queryset.count()
         unread = queryset.filter(is_read=False).count()
         read = queryset.filter(is_read=True).count()
-        by_type = queryset.values('type').annotate(count=Count('id'))
+        by_type = queryset.values('notification_type').annotate(count=Count('id'))
         
         return Response({
             'total_notifications': total,

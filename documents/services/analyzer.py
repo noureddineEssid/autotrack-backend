@@ -3,6 +3,7 @@ Service d'analyse de documents avec OCR
 """
 import pytesseract
 from PIL import Image
+from PyPDF2 import PdfReader
 import json
 import re
 from typing import Dict, Optional
@@ -82,6 +83,13 @@ class DocumentAnalyzer:
             Texte extrait
         """
         try:
+            if file_path.lower().endswith('.pdf'):
+                reader = PdfReader(file_path)
+                text = ''
+                for page in reader.pages:
+                    text += (page.extract_text() or '') + '\n'
+                return text.strip()
+
             # Ouvrir l'image
             image = Image.open(file_path)
             

@@ -4,7 +4,6 @@ Permissions personnalisées pour le contrôle d'accès basé sur les plans d'abo
 """
 from rest_framework.permissions import BasePermission
 from subscriptions.models import Subscription
-from plans.models import Plan
 
 
 class HasActivePlan(BasePermission):
@@ -20,10 +19,10 @@ class HasActivePlan(BasePermission):
             return False
         
         try:
-            subscription = Subscription.objects.select_related('plan').get(
+            subscription = Subscription.objects.filter(
                 user=request.user,
                 status='active'
-            )
+            ).first()
             return subscription is not None
         except Subscription.DoesNotExist:
             return False
@@ -56,15 +55,15 @@ class IsStandardPlan(BasePermission):
             return False
         
         try:
-            subscription = Subscription.objects.select_related('plan').get(
+            subscription = Subscription.objects.filter(
                 user=request.user,
                 status='active'
-            )
-            
-            if not subscription.plan:
+            ).first()
+
+            if not subscription:
                 return False
-            
-            return subscription.plan.type in self.ALLOWED_PLAN_TYPES
+
+            return subscription.plan_code in self.ALLOWED_PLAN_TYPES
             
         except Subscription.DoesNotExist:
             return False
@@ -83,15 +82,15 @@ class IsPremiumPlan(BasePermission):
             return False
         
         try:
-            subscription = Subscription.objects.select_related('plan').get(
+            subscription = Subscription.objects.filter(
                 user=request.user,
                 status='active'
-            )
-            
-            if not subscription.plan:
+            ).first()
+
+            if not subscription:
                 return False
-            
-            return subscription.plan.type == 'premium'
+
+            return subscription.plan_code == 'premium'
             
         except Subscription.DoesNotExist:
             return False
@@ -128,17 +127,17 @@ class RequiresPlanLevel(BasePermission):
             return True
         
         try:
-            subscription = Subscription.objects.select_related('plan').get(
+            subscription = Subscription.objects.filter(
                 user=request.user,
                 status='active'
-            )
-            
-            if not subscription.plan:
+            ).first()
+
+            if not subscription:
                 self.message = "Plan d'abonnement introuvable. Veuillez contacter le support."
                 return False
-            
+
             # Comparer les niveaux
-            user_level = self.PLAN_HIERARCHY.get(subscription.plan.type, 0)
+            user_level = self.PLAN_HIERARCHY.get(subscription.plan_code, 0)
             required = self.PLAN_HIERARCHY.get(required_level, 0)
             
             if user_level >= required:

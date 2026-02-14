@@ -8,9 +8,7 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ('plans', '0001_initial'),
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
@@ -43,7 +41,8 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('cancelled_at', models.DateTimeField(blank=True, null=True)),
-                ('plan', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='subscriptions', to='plans.plan')),
+                ('plan_code', models.CharField(default='free', max_length=50)),
+                ('plan_name', models.CharField(default='Free', max_length=100)),
             ],
             options={
                 'db_table': 'subscriptions',

@@ -70,7 +70,7 @@ class VehicleHealthPredictor:
     @classmethod
     def _calculate_age_factor(cls, vehicle):
         """Score basé sur l'âge du véhicule (0-100)"""
-        age_years = vehicle.age_years
+        age_years = cls._get_vehicle_age_years(vehicle)
         
         if age_years <= 2:
             return 100.0
@@ -86,11 +86,11 @@ class VehicleHealthPredictor:
     @classmethod
     def _calculate_mileage_factor(cls, vehicle):
         """Score basé sur le kilométrage"""
-        if not vehicle.current_mileage:
+        mileage = cls._get_vehicle_mileage(vehicle)
+        if not mileage:
             return 50.0  # Default if no mileage
         
-        mileage = vehicle.current_mileage
-        age_years = vehicle.age_years or 1
+        age_years = cls._get_vehicle_age_years(vehicle) or 1
         
         # Average km per year
         avg_km_per_year = mileage / age_years
@@ -111,13 +111,13 @@ class VehicleHealthPredictor:
     @classmethod
     def _calculate_maintenance_factor(cls, vehicle):
         """Score basé sur l'historique de maintenance"""
-        from maintenance.models import MaintenanceRecord
+        from maintenances.models import Maintenance
         
         # Get maintenance records from last 2 years
         two_years_ago = timezone.now() - timedelta(days=730)
-        recent_maintenance = MaintenanceRecord.objects.filter(
+        recent_maintenance = Maintenance.objects.filter(
             vehicle=vehicle,
-            date__gte=two_years_ago
+            service_date__gte=two_years_ago
         ).count()
         
         # Recommended maintenance per year (varies by vehicle age)
@@ -145,13 +145,13 @@ class VehicleHealthPredictor:
     @classmethod
     def _calculate_repair_history_factor(cls, vehicle):
         """Score basé sur l'historique de réparations"""
-        from repairs.models import Repair
+        from maintenances.models import Maintenance
         
         # Get repairs from last year
         one_year_ago = timezone.now() - timedelta(days=365)
-        recent_repairs = Repair.objects.filter(
+        recent_repairs = Maintenance.objects.filter(
             vehicle=vehicle,
-            date__gte=one_year_ago
+            service_date__gte=one_year_ago
         )
         
         repair_count = recent_repairs.count()
@@ -201,16 +201,28 @@ class VehicleHealthPredictor:
         if vehicle.current_mileage:
             data_points += 1
         
-        from maintenance.models import MaintenanceRecord
-        from repairs.models import Repair
+        from maintenances.models import Maintenance
         
-        if MaintenanceRecord.objects.filter(vehicle=vehicle).exists():
-            data_points += 1
-        if Repair.objects.filter(vehicle=vehicle).exists():
+        if Maintenance.objects.filter(vehicle=vehicle).exists():
             data_points += 1
         
         # Confidence: 0.5 (minimum) to 1.0 (maximum)
-        return 0.5 + (data_points * 0.125)  # Max 4 data points = 1.0
+        return min(1.0, 0.5 + (data_points * 0.125))  # Max 4 data points = 1.0
+
+    @staticmethod
+    def _get_vehicle_age_years(vehicle):
+        if vehicle.year:
+            return max(1, timezone.now().year - int(vehicle.year))
+        return 1
+
+    @staticmethod
+    def _get_vehicle_mileage(vehicle):
+        from maintenances.models import Maintenance
+        latest = Maintenance.objects.filter(
+            vehicle=vehicle,
+            mileage__isnull=False
+        ).order_by('-service_date').first()
+        return latest.mileage if latest else None
 
 
 class FailurePredictor:
@@ -259,8 +271,8 @@ class FailurePredictor:
     @classmethod
     def _predict_component_failure(cls, vehicle, component, thresholds):
         """Prédit la panne d'un composant spécifique"""
-        mileage = vehicle.current_mileage or 0
-        age_years = vehicle.age_years or 0
+        mileage = VehicleHealthPredictor._get_vehicle_mileage(vehicle) or 0
+        age_years = VehicleHealthPredictor._get_vehicle_age_years(vehicle) or 0
         
         # Calculate usage ratios
         mileage_ratio = mileage / thresholds['mileage'] if thresholds['mileage'] > 0 else 0
@@ -571,7 +583,7 @@ class MaintenanceRecommender:
     def _mileage_based_recommendations(cls, vehicle):
         """Recommandations basées sur le kilométrage"""
         recommendations = []
-        mileage = vehicle.current_mileage or 0
+        mileage = VehicleHealthPredictor._get_vehicle_mileage(vehicle) or 0
         
         # Oil change every 10,000 km
         if mileage % 10000 < 1000 and mileage > 0:

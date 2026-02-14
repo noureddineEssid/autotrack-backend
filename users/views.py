@@ -17,6 +17,7 @@ from .auth_utils import (
     generate_password_reset_token, verify_password_reset_token
 )
 from emails.email_service import EmailService
+from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
 
@@ -186,7 +187,7 @@ class ForgotPasswordView(APIView):
             uid, token = generate_password_reset_token(user)
             
             # Send email
-            reset_url = f"{request.scheme}://{request.get_host()}/reset-password/{uid}/{token}"
+            reset_url = f"{settings.FRONTEND_URL}/auth/reset-password?uid={uid}&token={token}"
             email_service.send_password_reset_email(
                 to_email=user.email,
                 user_name=user.first_name or user.email,

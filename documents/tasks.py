@@ -40,7 +40,12 @@ def async_analyze_document(document_id: int):
             'confidence': analysis_result.get('confidence'),
             'status': analysis_result.get('status')
         }
-        document.save(update_fields=['extracted_text', 'analysis_data'])
+        document.is_analyzed = analysis_result.get('status') == 'success'
+
+        if document.document_type == 'other' and analysis_result.get('document_type'):
+            document.document_type = analysis_result.get('document_type')
+
+        document.save(update_fields=['extracted_text', 'analysis_data', 'is_analyzed', 'document_type'])
         
         logger.info(
             f"Document {document_id} analyzed successfully "
@@ -60,6 +65,13 @@ def async_analyze_document(document_id: int):
         return {'status': 'error', 'message': 'Document not found'}
     except Exception as e:
         logger.error(f"Error analyzing document {document_id}: {str(e)}")
+        try:
+            document = Document.objects.get(id=document_id)
+            document.is_analyzed = False
+            document.analysis_data = {'status': 'error', 'error_message': str(e)}
+            document.save(update_fields=['is_analyzed', 'analysis_data'])
+        except Exception:
+            pass
         return {'status': 'error', 'message': str(e)}
 
 

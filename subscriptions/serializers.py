@@ -1,13 +1,11 @@
 from rest_framework import serializers
-from .models import Subscription
-from plans.serializers import PlanSerializer
+from .models import Subscription, SubscriptionHistory
 from users.serializers import UserSerializer
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     """Subscription serializer"""
     
-    plan_info = PlanSerializer(source='plan', read_only=True)
     user_info = serializers.SerializerMethodField()
     days_until_renewal = serializers.SerializerMethodField()
     is_trial_active = serializers.SerializerMethodField()
@@ -15,7 +13,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = [
-            'id', 'user', 'user_info', 'plan', 'plan_info', 'status',
+            'id', 'user', 'user_info', 'plan_code', 'plan_name', 'status',
             'stripe_subscription_id', 'stripe_customer_id', 'current_period_start',
             'current_period_end', 'cancel_at_period_end', 'trial_start', 'trial_end',
             'days_until_renewal', 'is_trial_active', 'created_at', 'updated_at'
@@ -55,12 +53,7 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Subscription
-        fields = ['plan']
-    
-    def validate_plan(self, value):
-        if not value.is_active:
-            raise serializers.ValidationError("This plan is not available.")
-        return value
+        fields = ['plan_code', 'plan_name']
     
     def create(self, validated_data):
         # Ajouter l'utilisateur de la requête
@@ -68,6 +61,13 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
         if request and hasattr(request, 'user'):
             validated_data['user'] = request.user
             validated_data['stripe_customer_id'] = request.user.stripe_customer_id or ''
+
+        from django.utils import timezone
+        from datetime import timedelta
+
+        validated_data.setdefault('status', 'active')
+        validated_data.setdefault('current_period_start', timezone.now())
+        validated_data.setdefault('current_period_end', timezone.now() + timedelta(days=30))
         
         # TODO: Create Stripe subscription via Celery
         # from subscriptions.tasks import create_stripe_subscription
@@ -84,3 +84,11 @@ class SubscriptionUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = ['status', 'cancel_at_period_end']
+
+
+class SubscriptionHistorySerializer(serializers.ModelSerializer):
+    """Subscription history serializer"""
+
+    class Meta:
+        model = SubscriptionHistory
+        fields = ['id', 'event_type', 'previous_status', 'new_status', 'metadata', 'created_at']

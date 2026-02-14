@@ -12,6 +12,7 @@ from .serializers import (
     DocumentUpdateSerializer
 )
 from .tasks import async_analyze_document, batch_analyze_documents
+from subscriptions.limits import enforce_limit
 
 
 class DocumentViewSet(viewsets.ModelViewSet):
@@ -48,6 +49,17 @@ class DocumentViewSet(viewsets.ModelViewSet):
         elif self.action == 'retrieve':
             return DocumentDetailSerializer
         return DocumentSerializer
+
+    def perform_create(self, serializer):
+        """Enforce document and storage limits"""
+        upload = self.request.FILES.get('file')
+        file_size = upload.size if upload else 0
+
+        enforce_limit(self.request.user, 'documents', amount=1)
+        if file_size:
+            enforce_limit(self.request.user, 'storage', extra_bytes=file_size)
+
+        serializer.save()
     
     @action(detail=False, methods=['get'])
     def by_type(self, request):

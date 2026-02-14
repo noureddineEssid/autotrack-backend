@@ -32,7 +32,6 @@ urlpatterns = [
     path('api/', include('diagnostics.urls')),
     path('api/', include('documents.urls')),
     path('api/', include('notifications.urls')),
-    path('api/', include('plans.urls')),
     path('api/', include('subscriptions.urls')),
     path('api/', include('webhooks.urls')),
     path('api/', include('settings_app.urls')),

@@ -15,6 +15,7 @@ python-dotenv==1.2.1
 django-celery-beat==2.8.1
 requests==2.32.5
 pytesseract==0.3.13
+PyPDF2==3.0.1
 bcrypt==4.2.1
 pyotp==2.9.0
 gunicorn==23.0.0

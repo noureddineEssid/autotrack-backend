@@ -10,6 +10,7 @@ from .serializers import (
     MaintenanceSerializer, MaintenanceCreateSerializer,
     MaintenanceDetailSerializer, MaintenanceUpdateSerializer
 )
+from subscriptions.limits import enforce_limit
 
 
 class MaintenanceViewSet(viewsets.ModelViewSet):
@@ -48,6 +49,7 @@ class MaintenanceViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """Set created_by to current user"""
+        enforce_limit(self.request.user, 'maintenances', amount=1)
         serializer.save(created_by=self.request.user)
     
     @action(detail=False, methods=['get'])

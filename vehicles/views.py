@@ -8,6 +8,7 @@ from .serializers import (
     VehicleSerializer, VehicleCreateSerializer, VehicleDetailSerializer,
     CarBrandSerializer, CarModelSerializer
 )
+from subscriptions.limits import enforce_limit
 
 
 class CarBrandViewSet(viewsets.ModelViewSet):
@@ -89,6 +90,7 @@ class VehicleViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """Set owner to current user"""
+        enforce_limit(self.request.user, 'vehicles', amount=1)
         serializer.save(owner=self.request.user)
     
     @action(detail=True, methods=['get'])

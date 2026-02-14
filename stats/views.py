@@ -46,51 +46,40 @@ class StatisticsViewSet(viewsets.ViewSet):
         month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         
         # Total counts
-        total_vehicles = Vehicle.objects.filter(user=user).count()
-        total_maintenances = Maintenance.objects.filter(vehicle__user=user).count()
-        total_diagnostics = Diagnostic.objects.filter(vehicle__user=user).count()
-        total_documents = Document.objects.filter(vehicle__user=user).count()
+        total_vehicles = Vehicle.objects.filter(owner=user).count()
+        total_maintenances = Maintenance.objects.filter(vehicle__owner=user).count()
+        total_diagnostics = Diagnostic.objects.filter(user=user).count()
+        total_documents = Document.objects.filter(user=user).count()
         
         # Pending/Critical
         pending_maintenances = Maintenance.objects.filter(
-            vehicle__user=user,
-            status__in=['scheduled', 'pending']
+            vehicle__owner=user,
+            status__in=['SCHEDULED', 'IN_PROGRESS']
         ).count()
         
         critical_diagnostics = Diagnostic.objects.filter(
-            vehicle__user=user,
-            severity='critical',
-            status='unresolved'
+            user=user,
+            status='pending'
         ).count()
         
-        expiring_documents = Document.objects.filter(
-            vehicle__user=user,
-            expiration_date__lte=now + timedelta(days=30),
-            expiration_date__gte=now
-        ).count()
+        expiring_documents = 0
         
         # Costs
         maintenances_ytd = Maintenance.objects.filter(
-            vehicle__user=user,
-            completed_at__gte=year_start
+            vehicle__owner=user,
+            service_date__gte=year_start
         ).aggregate(total=Sum('cost'))['total'] or Decimal('0.00')
         
-        diagnostics_ytd = Diagnostic.objects.filter(
-            vehicle__user=user,
-            created_at__gte=year_start
-        ).aggregate(total=Sum('estimated_cost'))['total'] or Decimal('0.00')
+        diagnostics_ytd = Decimal('0.00')
         
         total_cost_ytd = maintenances_ytd + diagnostics_ytd
         
         maintenances_mtd = Maintenance.objects.filter(
-            vehicle__user=user,
-            completed_at__gte=month_start
+            vehicle__owner=user,
+            service_date__gte=month_start
         ).aggregate(total=Sum('cost'))['total'] or Decimal('0.00')
         
-        diagnostics_mtd = Diagnostic.objects.filter(
-            vehicle__user=user,
-            created_at__gte=month_start
-        ).aggregate(total=Sum('estimated_cost'))['total'] or Decimal('0.00')
+        diagnostics_mtd = Decimal('0.00')
         
         total_cost_mtd = maintenances_mtd + diagnostics_mtd
         
@@ -135,24 +124,24 @@ class StatisticsViewSet(viewsets.ViewSet):
             start_date = None
         
         # Get maintenances by type
-        maintenances_query = Maintenance.objects.filter(vehicle__user=user)
+        maintenances_query = Maintenance.objects.filter(vehicle__owner=user)
         if start_date:
-            maintenances_query = maintenances_query.filter(completed_at__gte=start_date)
+            maintenances_query = maintenances_query.filter(service_date__gte=start_date)
         
-        maintenance_breakdown = maintenances_query.values('maintenance_type').annotate(
+        maintenance_breakdown = maintenances_query.values('service_type').annotate(
             amount=Sum('cost'),
             count=Count('id')
         )
         
         # Get diagnostics costs
-        diagnostics_query = Diagnostic.objects.filter(vehicle__user=user)
+        diagnostics_query = Diagnostic.objects.filter(user=user)
         if start_date:
             diagnostics_query = diagnostics_query.filter(created_at__gte=start_date)
         
-        diagnostic_total = diagnostics_query.aggregate(
-            amount=Sum('estimated_cost'),
-            count=Count('id')
-        )
+        diagnostic_total = {
+            'amount': Decimal('0.00'),
+            'count': diagnostics_query.count()
+        }
         
         # Calculate total for percentages
         total_amount = Decimal('0.00')
@@ -162,16 +151,15 @@ class StatisticsViewSet(viewsets.ViewSet):
             amount = item['amount'] or Decimal('0.00')
             total_amount += amount
             breakdown_list.append({
-                'category': item['maintenance_type'] or 'Autre',
+                'category': item['service_type'] or 'Autre',
                 'amount': amount,
                 'count': item['count'],
             })
         
-        if diagnostic_total['amount']:
-            total_amount += diagnostic_total['amount']
+        if diagnostic_total['count']:
             breakdown_list.append({
                 'category': 'Diagnostics',
-                'amount': diagnostic_total['amount'],
+                'amount': Decimal('0.00'),
                 'count': diagnostic_total['count'],
             })
         
@@ -196,25 +184,25 @@ class StatisticsViewSet(viewsets.ViewSet):
         
         # Get all maintenances and diagnostics
         maintenances = Maintenance.objects.filter(
-            vehicle__user=user,
-            completed_at__gte=start_date
-        ).values('completed_at', 'cost')
+            vehicle__owner=user,
+            service_date__gte=start_date
+        ).values('service_date', 'cost')
         
         diagnostics = Diagnostic.objects.filter(
-            vehicle__user=user,
+            user=user,
             created_at__gte=start_date
-        ).values('created_at', 'estimated_cost')
+        ).values('created_at')
         
         # Group by month
         monthly_data = {}
         
         for m in maintenances:
-            if m['completed_at']:
-                month_key = m['completed_at'].strftime('%Y-%m')
+            if m['service_date']:
+                month_key = m['service_date'].strftime('%Y-%m')
                 if month_key not in monthly_data:
                     monthly_data[month_key] = {
-                        'month': m['completed_at'].strftime('%B'),
-                        'year': m['completed_at'].year,
+                        'month': m['service_date'].strftime('%B'),
+                        'year': m['service_date'].year,
                         'total_cost': Decimal('0.00'),
                         'maintenance_cost': Decimal('0.00'),
                         'diagnostic_cost': Decimal('0.00'),
@@ -235,8 +223,8 @@ class StatisticsViewSet(viewsets.ViewSet):
                     'diagnostic_cost': Decimal('0.00'),
                     'count': 0,
                 }
-            monthly_data[month_key]['diagnostic_cost'] += d['estimated_cost'] or Decimal('0.00')
-            monthly_data[month_key]['total_cost'] += d['estimated_cost'] or Decimal('0.00')
+            monthly_data[month_key]['diagnostic_cost'] += Decimal('0.00')
+            monthly_data[month_key]['total_cost'] += Decimal('0.00')
             monthly_data[month_key]['count'] += 1
         
         # Sort by date
@@ -252,7 +240,7 @@ class StatisticsViewSet(viewsets.ViewSet):
         GET /api/statistics/vehicles-stats/
         """
         user = request.user
-        vehicles = Vehicle.objects.filter(user=user)
+        vehicles = Vehicle.objects.filter(owner=user)
         
         stats_list = []
         
@@ -268,21 +256,21 @@ class StatisticsViewSet(viewsets.ViewSet):
             
             avg_cost_per_maintenance = (maintenances.aggregate(Avg('cost'))['cost__avg'] or Decimal('0.00'))
             
-            last_maintenance = maintenances.filter(status='completed').order_by('-completed_at').first()
-            next_maintenance = maintenances.filter(status='scheduled').order_by('scheduled_at').first()
+            last_maintenance = maintenances.filter(status='COMPLETED').order_by('-service_date').first()
+            next_maintenance = maintenances.filter(status='SCHEDULED').order_by('service_date').first()
             
             stats_list.append({
                 'vehicle_id': vehicle.id,
-                'vehicle_name': f"{vehicle.brand} {vehicle.model}",
-                'brand': vehicle.brand,
+                'vehicle_name': f"{vehicle.make} {vehicle.model}",
+                'make': vehicle.make,
                 'model': vehicle.model,
                 'year': vehicle.year,
                 'total_cost': total_cost,
                 'maintenance_count': maintenance_count,
                 'diagnostic_count': diagnostic_count,
                 'avg_cost_per_maintenance': avg_cost_per_maintenance,
-                'last_maintenance_date': last_maintenance.completed_at if last_maintenance else None,
-                'next_maintenance_date': next_maintenance.scheduled_at if next_maintenance else None,
+                'last_maintenance_date': last_maintenance.service_date if last_maintenance else None,
+                'next_maintenance_date': next_maintenance.service_date if next_maintenance else None,
             })
         
         serializer = VehicleStatsSerializer(stats_list, many=True)
@@ -297,33 +285,33 @@ class StatisticsViewSet(viewsets.ViewSet):
         user = request.user
         now = timezone.now()
         
-        maintenances = Maintenance.objects.filter(vehicle__user=user)
+        maintenances = Maintenance.objects.filter(vehicle__owner=user)
         
         total_count = maintenances.count()
-        completed_count = maintenances.filter(status='completed').count()
-        pending_count = maintenances.filter(status__in=['scheduled', 'pending']).count()
+        completed_count = maintenances.filter(status='COMPLETED').count()
+        pending_count = maintenances.filter(status__in=['SCHEDULED', 'IN_PROGRESS']).count()
         overdue_count = maintenances.filter(
-            status='scheduled',
-            scheduled_at__lt=now
+            status='SCHEDULED',
+            service_date__lt=now
         ).count()
         
         total_cost = maintenances.aggregate(Sum('cost'))['cost__sum'] or Decimal('0.00')
         avg_cost = maintenances.aggregate(Avg('cost'))['cost__avg'] or Decimal('0.00')
         
-        most_common = maintenances.values('maintenance_type').annotate(
+        most_common = maintenances.values('service_type').annotate(
             count=Count('id')
         ).order_by('-count').first()
         
         upcoming_7days = maintenances.filter(
-            status='scheduled',
-            scheduled_at__gte=now,
-            scheduled_at__lte=now + timedelta(days=7)
+            status='SCHEDULED',
+            service_date__gte=now,
+            service_date__lte=now + timedelta(days=7)
         ).count()
         
         upcoming_30days = maintenances.filter(
-            status='scheduled',
-            scheduled_at__gte=now,
-            scheduled_at__lte=now + timedelta(days=30)
+            status='SCHEDULED',
+            service_date__gte=now,
+            service_date__lte=now + timedelta(days=30)
         ).count()
         
         data = {
@@ -333,7 +321,7 @@ class StatisticsViewSet(viewsets.ViewSet):
             'overdue_count': overdue_count,
             'total_cost': total_cost,
             'avg_cost': avg_cost,
-            'most_common_type': most_common['maintenance_type'] if most_common else 'N/A',
+            'most_common_type': most_common['service_type'] if most_common else 'N/A',
             'upcoming_7days': upcoming_7days,
             'upcoming_30days': upcoming_30days,
         }
@@ -349,41 +337,28 @@ class StatisticsViewSet(viewsets.ViewSet):
         """
         user = request.user
         
-        diagnostics = Diagnostic.objects.filter(vehicle__user=user)
+        diagnostics = Diagnostic.objects.filter(user=user)
         
         total_count = diagnostics.count()
-        critical_count = diagnostics.filter(severity='critical').count()
-        high_count = diagnostics.filter(severity='high').count()
-        medium_count = diagnostics.filter(severity='medium').count()
-        low_count = diagnostics.filter(severity='low').count()
         
-        resolved_count = diagnostics.filter(status='resolved').count()
-        unresolved_count = diagnostics.filter(status='unresolved').count()
+        resolved_count = diagnostics.filter(status='completed').count()
+        unresolved_count = diagnostics.filter(status__in=['pending', 'in_progress']).count()
         
-        # Calculate avg resolution time
-        resolved = diagnostics.filter(status='resolved', resolved_at__isnull=False)
-        resolution_times = []
-        for d in resolved:
-            delta = d.resolved_at - d.created_at
-            resolution_times.append(delta.days)
-        
-        avg_resolution_time = sum(resolution_times) / len(resolution_times) if resolution_times else None
-        
-        # Most common issue
-        most_common = diagnostics.values('diagnostic_code').annotate(
+        # No severity or resolution time in current model
+        most_common = diagnostics.values('title').annotate(
             count=Count('id')
         ).order_by('-count').first()
         
         data = {
             'total_count': total_count,
-            'critical_count': critical_count,
-            'high_count': high_count,
-            'medium_count': medium_count,
-            'low_count': low_count,
+            'critical_count': 0,
+            'high_count': 0,
+            'medium_count': 0,
+            'low_count': 0,
             'resolved_count': resolved_count,
             'unresolved_count': unresolved_count,
-            'avg_resolution_time_days': Decimal(str(avg_resolution_time)) if avg_resolution_time else None,
-            'most_common_issue': most_common['diagnostic_code'] if most_common else None,
+            'avg_resolution_time_days': None,
+            'most_common_issue': most_common['title'] if most_common else None,
         }
         
         serializer = DiagnosticStatsSerializer(data)
@@ -416,31 +391,20 @@ class StatisticsViewSet(viewsets.ViewSet):
         
         # Current period
         current_maintenances = Maintenance.objects.filter(
-            vehicle__user=user,
-            completed_at__gte=current_start
+            vehicle__owner=user,
+            service_date__gte=current_start
         ).aggregate(Sum('cost'))['cost__sum'] or Decimal('0.00')
         
-        current_diagnostics = Diagnostic.objects.filter(
-            vehicle__user=user,
-            created_at__gte=current_start
-        ).aggregate(Sum('estimated_cost'))['estimated_cost__sum'] or Decimal('0.00')
-        
-        current_period_cost = current_maintenances + current_diagnostics
+        current_period_cost = current_maintenances
         
         # Previous period
         previous_maintenances = Maintenance.objects.filter(
-            vehicle__user=user,
-            completed_at__gte=previous_start,
-            completed_at__lt=previous_end
+            vehicle__owner=user,
+            service_date__gte=previous_start,
+            service_date__lt=previous_end
         ).aggregate(Sum('cost'))['cost__sum'] or Decimal('0.00')
         
-        previous_diagnostics = Diagnostic.objects.filter(
-            vehicle__user=user,
-            created_at__gte=previous_start,
-            created_at__lt=previous_end
-        ).aggregate(Sum('estimated_cost'))['estimated_cost__sum'] or Decimal('0.00')
-        
-        previous_period_cost = previous_maintenances + previous_diagnostics
+        previous_period_cost = previous_maintenances
         
         difference = current_period_cost - previous_period_cost
         percentage_change = (difference / previous_period_cost * 100) if previous_period_cost > 0 else Decimal('0.00')

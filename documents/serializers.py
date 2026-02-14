@@ -87,11 +87,11 @@ class DocumentCreateSerializer(serializers.ModelSerializer):
             validated_data['mime_type'] = file.content_type
         
         document = super().create(validated_data)
-        
-        # TODO: Trigger OCR processing asynchronously via Celery for images and PDFs
-        # from documents.tasks import process_document_ocr
-        # if document.mime_type in ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']:
-        #     process_document_ocr.delay(document.id)
+
+        # Trigger OCR processing asynchronously via Celery for images and PDFs
+        from documents.tasks import async_analyze_document
+        if document.mime_type in ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']:
+            async_analyze_document.delay(document.id)
         
         return document
 
@@ -153,10 +153,10 @@ class DocumentUpdateSerializer(serializers.ModelSerializer):
             validated_data['is_analyzed'] = False
         
         document = super().update(instance, validated_data)
-        
-        # TODO: Trigger OCR processing if file changed
-        # from documents.tasks import process_document_ocr
-        # if file and document.mime_type in ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']:
-        #     process_document_ocr.delay(document.id)
+
+        # Trigger OCR processing if file changed
+        if file and document.mime_type in ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']:
+            from documents.tasks import async_analyze_document
+            async_analyze_document.delay(document.id)
         
         return document

@@ -32,7 +32,7 @@ class VehicleHealthScoreViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         queryset = VehicleHealthScore.objects.filter(
-            vehicle__user=self.request.user
+            vehicle__owner=self.request.user
         ).select_related('vehicle')
         
         # Filter by vehicle
@@ -59,7 +59,7 @@ class VehicleHealthScoreViewSet(viewsets.ReadOnlyModelViewSet):
             )
         
         try:
-            vehicle = Vehicle.objects.get(id=vehicle_id, user=request.user)
+            vehicle = Vehicle.objects.get(id=vehicle_id, owner=request.user)
         except Vehicle.DoesNotExist:
             return Response(
                 {'error': 'Véhicule non trouvé'},
@@ -80,7 +80,7 @@ class VehicleHealthScoreViewSet(viewsets.ReadOnlyModelViewSet):
         """
         from vehicles.models import Vehicle
         
-        vehicles = Vehicle.objects.filter(user=request.user)
+        vehicles = Vehicle.objects.filter(owner=request.user)
         latest_scores = []
         
         for vehicle in vehicles:
@@ -101,7 +101,7 @@ class FailurePredictionViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         queryset = FailurePrediction.objects.filter(
-            vehicle__user=self.request.user
+            vehicle__owner=self.request.user
         ).select_related('vehicle')
         
         # Filters
@@ -144,7 +144,7 @@ class FailurePredictionViewSet(viewsets.ModelViewSet):
             )
         
         try:
-            vehicle = Vehicle.objects.get(id=vehicle_id, user=request.user)
+            vehicle = Vehicle.objects.get(id=vehicle_id, owner=request.user)
         except Vehicle.DoesNotExist:
             return Response(
                 {'error': 'Véhicule non trouvé'},
@@ -233,7 +233,7 @@ class MaintenanceRecommendationViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         queryset = MaintenanceRecommendation.objects.filter(
-            vehicle__user=self.request.user
+            vehicle__owner=self.request.user
         ).select_related('vehicle', 'failure_prediction')
         
         # Filters
@@ -274,7 +274,7 @@ class MaintenanceRecommendationViewSet(viewsets.ModelViewSet):
             )
         
         try:
-            vehicle = Vehicle.objects.get(id=vehicle_id, user=request.user)
+            vehicle = Vehicle.objects.get(id=vehicle_id, owner=request.user)
         except Vehicle.DoesNotExist:
             return Response(
                 {'error': 'Véhicule non trouvé'},
@@ -411,17 +411,17 @@ class PredictionStatsViewSet(viewsets.ViewSet):
         """
         from vehicles.models import Vehicle
         
-        vehicles = Vehicle.objects.filter(user=request.user)
+        vehicles = Vehicle.objects.filter(owner=request.user)
         
         # Health scores
         health_scores = VehicleHealthScore.objects.filter(
-            vehicle__user=request.user
+            vehicle__owner=request.user
         )
         avg_health = health_scores.aggregate(Avg('score'))['score__avg'] or 0
         
         # Predictions
         predictions = FailurePrediction.objects.filter(
-            vehicle__user=request.user
+            vehicle__owner=request.user
         )
         total_predictions = predictions.count()
         active_predictions = predictions.filter(status='active').count()
@@ -439,7 +439,7 @@ class PredictionStatsViewSet(viewsets.ViewSet):
         
         # Recommendations
         recommendations = MaintenanceRecommendation.objects.filter(
-            vehicle__user=request.user
+            vehicle__owner=request.user
         )
         total_recommendations = recommendations.count()
         urgent_recommendations = recommendations.filter(

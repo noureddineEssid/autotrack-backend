@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from plans.models import Plan
 
 
 class Subscription(models.Model):
@@ -19,7 +18,8 @@ class Subscription(models.Model):
         on_delete=models.CASCADE,
         related_name='subscriptions'
     )
-    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name='subscriptions')
+    plan_code = models.CharField(max_length=50, default='free')
+    plan_name = models.CharField(max_length=100, default='Free')
     
     # Stripe integration
     stripe_subscription_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
@@ -50,7 +50,7 @@ class Subscription(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.user.email} - {self.plan.name}"
+        return f"{self.user.email} - {self.plan_name}"
     
     def is_active(self):
         """Check if subscription is active"""

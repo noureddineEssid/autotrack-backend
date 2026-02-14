@@ -9,6 +9,7 @@ from .serializers import (
     DiagnosticSerializer, DiagnosticCreateSerializer, DiagnosticDetailSerializer,
     DiagnosticUpdateSerializer, DiagnosticReplySerializer, DiagnosticReplyCreateSerializer
 )
+from subscriptions.limits import enforce_limit
 
 
 class DiagnosticViewSet(viewsets.ModelViewSet):
@@ -44,6 +45,11 @@ class DiagnosticViewSet(viewsets.ModelViewSet):
         elif self.action == 'retrieve':
             return DiagnosticDetailSerializer
         return DiagnosticSerializer
+
+    def perform_create(self, serializer):
+        """Enforce diagnostics limits"""
+        enforce_limit(self.request.user, 'diagnostics', amount=1)
+        serializer.save(user=self.request.user)
     
     @action(detail=True, methods=['post'])
     def add_reply(self, request, pk=None):

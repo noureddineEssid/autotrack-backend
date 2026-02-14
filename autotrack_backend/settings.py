@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'garages',
     'diagnostics',
     'subscriptions',
-    'plans',
     'documents',
     'notifications',
     'webhooks',
@@ -166,6 +165,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Media files
 MEDIA_URL = config('MEDIA_URL', default='/media/')
 MEDIA_ROOT = BASE_DIR / config('MEDIA_ROOT', default='media')
+
+# Frontend URL (used in emails and redirects)
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
