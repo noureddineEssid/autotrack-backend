@@ -1,149 +1,206 @@
 from django.core.management.base import BaseCommand
 from vehicles.models import Vehicle, CarBrand, CarModel
 from users.models import User
-import requests
-from datetime import datetime
 
 
 class Command(BaseCommand):
-    help = 'Seeds the vehicles, car brands, and car models tables with test data'
+    help = 'Seeds the vehicles, car brands, and car models tables with realistic data'
 
     def handle(self, *args, **kwargs):
-        # Nettoyer les tables
         Vehicle.objects.all().delete()
         CarBrand.objects.all().delete()
         CarModel.objects.all().delete()
         self.stdout.write('Tables cleared')
-        
-        # Récupérer les utilisateurs
-        users = list(User.objects.all()[:4])
-        if len(users) < 2:
+
+        users = {
+            user.email: user
+            for user in User.objects.filter(
+                email__in=[
+                    'amal.benali@example.com',
+                    'youssef.chaari@example.com',
+                    'salma.trabelsi@example.com',
+                ]
+            )
+        }
+
+        if len(users) < 3:
             self.stdout.write(self.style.ERROR('Pas assez d\'utilisateurs. Exécutez seed_users d\'abord.'))
             return
-        
-        # Créer des véhicules de test
+
         vehicles_data = [
+            # Free plan user (<= 3 vehicles)
             {
-                'make': 'Toyota',
-                'model': 'Corolla',
-                'year': 2018,
-                'license_plate': 'AA-123-BB',
-                'vin': 'JT2BF22K1W0123456',
-                'owner': users[0],
-                'fuel_type': 'gasoline',
-                'transmission': 'automatic'
-            },
-            {
+                'owner': users['amal.benali@example.com'],
                 'make': 'Renault',
                 'model': 'Clio',
-                'year': 2020,
-                'license_plate': 'CC-456-DD',
-                'vin': 'VF1RFA00912345678',
-                'owner': users[1] if len(users) > 1 else users[0],
+                'year': 2019,
+                'license_plate': 'TU-214-AB',
+                'vin': 'VF1RFA009KJ123456',
+                'color': 'Blanc',
                 'fuel_type': 'diesel',
-                'transmission': 'manual'
+                'transmission': 'manual',
             },
             {
+                'owner': users['amal.benali@example.com'],
+                'make': 'Toyota',
+                'model': 'Yaris',
+                'year': 2017,
+                'license_plate': 'TU-987-CD',
+                'vin': 'JTDBR32E201234567',
+                'color': 'Gris',
+                'fuel_type': 'gasoline',
+                'transmission': 'automatic',
+            },
+            # Standard plan user (<= 10 vehicles)
+            {
+                'owner': users['youssef.chaari@example.com'],
                 'make': 'Peugeot',
                 'model': '308',
-                'year': 2019,
-                'license_plate': 'EE-789-FF',
-                'vin': 'VF34C5FSC12345678',
-                'owner': users[0],
+                'year': 2020,
+                'license_plate': 'TU-556-EF',
+                'vin': 'VF34C5FSCM1234567',
+                'color': 'Bleu',
+                'fuel_type': 'diesel',
+                'transmission': 'manual',
+            },
+            {
+                'owner': users['youssef.chaari@example.com'],
+                'make': 'Volkswagen',
+                'model': 'Golf',
+                'year': 2018,
+                'license_plate': 'TU-612-GH',
+                'vin': 'WVWZZZ1KZJW123456',
+                'color': 'Noir',
+                'fuel_type': 'gasoline',
+                'transmission': 'manual',
+            },
+            {
+                'owner': users['youssef.chaari@example.com'],
+                'make': 'Hyundai',
+                'model': 'Tucson',
+                'year': 2021,
+                'license_plate': 'TU-778-JK',
+                'vin': 'KMHJT81B4MU123456',
+                'color': 'Rouge',
                 'fuel_type': 'hybrid',
-                'transmission': 'automatic'
-            }
+                'transmission': 'automatic',
+            },
+            {
+                'owner': users['youssef.chaari@example.com'],
+                'make': 'Fiat',
+                'model': '500',
+                'year': 2016,
+                'license_plate': 'TU-443-LM',
+                'vin': 'ZFA3120000J123456',
+                'color': 'Blanc',
+                'fuel_type': 'gasoline',
+                'transmission': 'manual',
+            },
+            {
+                'owner': users['youssef.chaari@example.com'],
+                'make': 'Kia',
+                'model': 'Sportage',
+                'year': 2019,
+                'license_plate': 'TU-991-NP',
+                'vin': 'KNAKU81B0K5123456',
+                'color': 'Gris',
+                'fuel_type': 'diesel',
+                'transmission': 'automatic',
+            },
+            # Premium plan user (unlimited vehicles, seeded with 8)
+            {
+                'owner': users['salma.trabelsi@example.com'],
+                'make': 'BMW',
+                'model': '320i',
+                'year': 2021,
+                'license_plate': 'TU-110-QR',
+                'vin': 'WBA8E1C53MK123456',
+                'color': 'Noir',
+                'fuel_type': 'gasoline',
+                'transmission': 'automatic',
+            },
+            {
+                'owner': users['salma.trabelsi@example.com'],
+                'make': 'Mercedes-Benz',
+                'model': 'C200',
+                'year': 2020,
+                'license_plate': 'TU-223-ST',
+                'vin': 'WDDWF8DB9LR123456',
+                'color': 'Gris',
+                'fuel_type': 'gasoline',
+                'transmission': 'automatic',
+            },
+            {
+                'owner': users['salma.trabelsi@example.com'],
+                'make': 'Audi',
+                'model': 'A3',
+                'year': 2019,
+                'license_plate': 'TU-334-UV',
+                'vin': 'WAUZZZ8V0K1123456',
+                'color': 'Bleu',
+                'fuel_type': 'gasoline',
+                'transmission': 'automatic',
+            },
+            {
+                'owner': users['salma.trabelsi@example.com'],
+                'make': 'Tesla',
+                'model': 'Model 3',
+                'year': 2022,
+                'license_plate': 'TU-445-WX',
+                'vin': '5YJ3E1EA0NF123456',
+                'color': 'Blanc',
+                'fuel_type': 'electric',
+                'transmission': 'automatic',
+            },
+            {
+                'owner': users['salma.trabelsi@example.com'],
+                'make': 'Dacia',
+                'model': 'Duster',
+                'year': 2018,
+                'license_plate': 'TU-556-YZ',
+                'vin': 'UU1HSDAA6J1234567',
+                'color': 'Orange',
+                'fuel_type': 'diesel',
+                'transmission': 'manual',
+            },
+            {
+                'owner': users['salma.trabelsi@example.com'],
+                'make': 'Peugeot',
+                'model': '3008',
+                'year': 2022,
+                'license_plate': 'TU-667-AA',
+                'vin': 'VF3MRHNS0NS123456',
+                'color': 'Gris',
+                'fuel_type': 'hybrid',
+                'transmission': 'automatic',
+            },
+            {
+                'owner': users['salma.trabelsi@example.com'],
+                'make': 'Citroen',
+                'model': 'C4',
+                'year': 2021,
+                'license_plate': 'TU-778-BB',
+                'vin': 'VR7BBAHH0MG123456',
+                'color': 'Blanc',
+                'fuel_type': 'gasoline',
+                'transmission': 'automatic',
+            },
         ]
-        
+
         created_vehicles = []
         for vehicle_data in vehicles_data:
-            vehicle = Vehicle.objects.create(**vehicle_data)
-            created_vehicles.append(vehicle)
-        
+            created_vehicles.append(Vehicle.objects.create(**vehicle_data))
+
+        brand_names = sorted({vehicle['make'] for vehicle in vehicles_data})
+        brands = {name: CarBrand.objects.create(name=name) for name in brand_names}
+
+        created_models = 0
+        unique_models = {(vehicle['make'], vehicle['model']) for vehicle in vehicles_data}
+        for make, model in unique_models:
+            brand = brands[make]
+            CarModel.objects.get_or_create(name=model, brand=brand)
+            created_models += 1
+
         self.stdout.write(self.style.SUCCESS(f'✅ Successfully seeded {len(created_vehicles)} vehicles'))
-        
-        # Récupérer les marques depuis l'API NHTSA
-        brands = []
-        try:
-            response = requests.get(
-                'https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=json',
-                timeout=10
-            )
-            if response.status_code == 200:
-                data = response.json()
-                if 'Results' in data:
-                    brands = data['Results']
-        except Exception as e:
-            self.stdout.write(self.style.WARNING(f'⚠️  Could not fetch brands from API: {str(e)}'))
-        
-        # Liste des marques populaires
-        popular_brands = [
-            'Toyota', 'Volkswagen', 'Ford', 'Honda', 'Chevrolet', 'Nissan', 'Hyundai', 'Kia', 'Renault', 'Peugeot',
-            'Mercedes-Benz', 'BMW', 'Fiat', 'Audi', 'Skoda', 'Opel', 'Mazda', 'Citroën', 'Jeep', 'Dacia',
-            'Seat', 'Subaru', 'Volvo', 'Mini', 'Land Rover', 'Suzuki', 'Mitsubishi', 'Lexus', 'Porsche', 'Jaguar',
-            'Alfa Romeo', 'Tesla', 'Chrysler', 'Dodge', 'Ram', 'Buick', 'Cadillac', 'GMC', 'Lincoln', 'Infiniti',
-            'Acura', 'Genesis', 'Saab', 'Smart', 'Isuzu', 'SsangYong', 'Great Wall', 'Geely', 'BYD', 'Haval',
-            'Pontiac', 'Saturn', 'Scion', 'Oldsmobile', 'Hummer', 'Daewoo', 'Rover', 'Lancia', 'Proton', 'Perodua',
-            'Tata', 'Mahindra', 'Chery', 'FAW', 'Dongfeng', 'Zotye', 'BAIC', 'JAC', 'Foton', 'Lifan',
-            'Maruti', 'Holden', 'HSV', 'Vauxhall', 'Morgan', 'Pagani', 'Bugatti', 'Bentley', 'Rolls-Royce', 'Aston Martin',
-            'McLaren', 'Lotus', 'Caterham', 'Daihatsu', 'Luxgen', 'Wuling', 'Baojun', 'Polestar', 'Cupra', 'Abarth',
-            'DS', 'Datsun', 'Eagle', 'Fisker', 'GAC', 'Hino', 'MAN', 'Peterbilt', 'Kenworth', 'Western Star',
-            'Freightliner', 'Navistar', 'International', 'Mack', 'Sterling', 'Yutong', 'King Long', 'Setra', 'Neoplan', 'Iveco'
-        ]
-        
-        # Fonction de normalisation
-        def normalize(text):
-            if not text:
-                return ''
-            import unicodedata
-            text = text.upper().replace('-', '').replace(' ', '')
-            return ''.join(c for c in unicodedata.normalize('NFD', text) 
-                         if unicodedata.category(c) != 'Mn')
-        
-        normalized_popular = [normalize(b) for b in popular_brands]
-        
-        # Filtrer les marques populaires
-        filtered_brands = [
-            b for b in brands 
-            if normalize(b.get('Make_Name', b.get('name', ''))) in normalized_popular
-        ]
-        
-        created_brands = []
-        for brand in filtered_brands[:100]:  # Limiter à 100 marques
-            try:
-                car_brand = CarBrand.objects.create(
-                    name=brand.get('Make_Name', brand.get('name', 'Unknown'))
-                )
-                created_brands.append(car_brand)
-            except Exception:
-                pass
-        
-        self.stdout.write(self.style.SUCCESS(f'✅ Successfully seeded {len(created_brands)} car brands'))
-        
-        # Créer les modèles pour chaque marque
-        total_models = 0
-        for brand in created_brands[:20]:  # Limiter aux 20 premières marques pour ne pas surcharger
-            models = []
-            try:
-                response = requests.get(
-                    f'https://vpic.nhtsa.dot.gov/api/vehicles/getmodelsformake/{brand.name}?format=json',
-                    timeout=30
-                )
-                if response.status_code == 200:
-                    data = response.json()
-                    if 'Results' in data:
-                        models = data['Results']
-            except Exception:
-                continue
-            
-            for model in models[:50]:  # Limiter à 50 modèles par marque
-                try:
-                    CarModel.objects.create(
-                        name=model.get('Model_Name', model.get('name', 'Unknown')),
-                        brand=brand
-                    )
-                    total_models += 1
-                except Exception:
-                    pass
-        
-        self.stdout.write(self.style.SUCCESS(f'✅ Successfully seeded {total_models} car models'))
+        self.stdout.write(self.style.SUCCESS(f'✅ Successfully seeded {len(brands)} car brands'))
+        self.stdout.write(self.style.SUCCESS(f'✅ Successfully seeded {created_models} car models'))

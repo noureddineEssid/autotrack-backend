@@ -3,58 +3,53 @@ from users.models import User
 
 
 class Command(BaseCommand):
-    help = 'Seeds the users table with test data'
+    help = 'Seeds the users table with realistic data'
 
     def handle(self, *args, **kwargs):
-        # Nettoyer les utilisateurs existants
         User.objects.all().delete()
         self.stdout.write('Users table cleared')
-        
-        # Créer les utilisateurs de test
+
+        default_password = 'AutoTrack2025!'
+
+        admin_data = {
+            'email': 'admin@autotrack.tn',
+            'first_name': 'Nabil',
+            'last_name': 'Kharroubi',
+            'phone_number': '+21620123456',
+            'roles': ['admin'],
+            'email_verified': True,
+        }
+
         users_data = [
             {
-                'email': 'john.smith@example.com',
-                'username': 'john.smith@example.com',
-                'first_name': 'John',
-                'last_name': 'Smith',
-                'phone_number': '+1234567890',
+                'email': 'amal.benali@example.com',
+                'first_name': 'Amal',
+                'last_name': 'Ben Ali',
+                'phone_number': '+21622111222',
+                'roles': ['user'],
+                'email_verified': True,
             },
             {
-                'email': 'sarah.johnson@example.com',
-                'username': 'sarah.johnson@example.com',
-                'first_name': 'Sarah',
-                'last_name': 'Johnson',
-                'phone_number': '+1234567891',
+                'email': 'youssef.chaari@example.com',
+                'first_name': 'Youssef',
+                'last_name': 'Chaari',
+                'phone_number': '+21623111333',
+                'roles': ['user'],
+                'email_verified': True,
             },
             {
-                'email': 'michael.chen@example.com',
-                'username': 'michael.chen@example.com',
-                'first_name': 'Michael',
-                'last_name': 'Chen',
-                'phone_number': '+1234567892',
-            },
-            {
-                'email': 'emily.rodriguez@example.com',
-                'username': 'emily.rodriguez@example.com',
-                'first_name': 'Emily',
-                'last_name': 'Rodriguez',
-                'phone_number': '+1234567893',
-            },
-            {
-                'email': 'david.kim@example.com',
-                'username': 'david.kim@example.com',
-                'first_name': 'David',
-                'last_name': 'Kim',
-                'phone_number': '+1234567894',
+                'email': 'salma.trabelsi@example.com',
+                'first_name': 'Salma',
+                'last_name': 'Trabelsi',
+                'phone_number': '+21624111444',
+                'roles': ['user'],
+                'email_verified': True,
             },
         ]
-        
-        created_count = 0
+
+        User.objects.create_superuser(password=default_password, **admin_data)
+
         for user_data in users_data:
-            user = User.objects.create_user(
-                password='123456789@@',
-                **user_data
-            )
-            created_count += 1
-        
-        self.stdout.write(self.style.SUCCESS(f'✅ Successfully seeded {created_count} users'))
+            User.objects.create_user(password=default_password, **user_data)
+
+        self.stdout.write(self.style.SUCCESS('✅ Successfully seeded 4 users'))

@@ -9,7 +9,6 @@ class Command(BaseCommand):
         seeds = [
             ('seed_users', 'Users'),
             ('seed_vehicles', 'Vehicles'),
-            ('seed_plans', 'Plans & Features'),
             ('seed_subscriptions', 'Subscriptions'),
             ('seed_garages', 'Garages'),
             ('seed_maintenances', 'Maintenances'),
