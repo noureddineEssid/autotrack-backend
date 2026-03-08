@@ -12,6 +12,126 @@ logger = logging.getLogger(__name__)
 email_service = EmailService()
 
 
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def cancel_stripe_subscription(self, subscription_id: int) -> str:
+    """
+    Annuler un abonnement Stripe à la fin de la période en cours.
+    Retries automatiques en cas d'erreur réseau.
+    """
+    try:
+        import stripe
+        from django.conf import settings
+
+        subscription = Subscription.objects.get(id=subscription_id)
+
+        if not subscription.stripe_subscription_id:
+            logger.info(
+                f"Subscription {subscription_id} has no Stripe ID — skipping Stripe cancellation"
+            )
+            return "skipped: no stripe subscription ID"
+
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        stripe.Subscription.modify(
+            subscription.stripe_subscription_id,
+            cancel_at_period_end=True,
+        )
+        logger.info(
+            f"Stripe subscription {subscription.stripe_subscription_id} scheduled for cancellation at period end"
+        )
+        return f"cancelled stripe sub {subscription.stripe_subscription_id}"
+
+    except Subscription.DoesNotExist:
+        logger.error(f"Subscription {subscription_id} not found")
+        return f"error: subscription {subscription_id} not found"
+    except Exception as exc:
+        logger.error(f"Error cancelling Stripe subscription {subscription_id}: {exc}")
+        raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def reactivate_stripe_subscription(self, subscription_id: int) -> str:
+    """
+    Réactiver un abonnement Stripe dont l'annulation était programmée.
+    """
+    try:
+        import stripe
+        from django.conf import settings
+
+        subscription = Subscription.objects.get(id=subscription_id)
+
+        if not subscription.stripe_subscription_id:
+            logger.info(
+                f"Subscription {subscription_id} has no Stripe ID — skipping Stripe reactivation"
+            )
+            return "skipped: no stripe subscription ID"
+
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        stripe.Subscription.modify(
+            subscription.stripe_subscription_id,
+            cancel_at_period_end=False,
+        )
+        logger.info(
+            f"Stripe subscription {subscription.stripe_subscription_id} reactivated"
+        )
+        return f"reactivated stripe sub {subscription.stripe_subscription_id}"
+
+    except Subscription.DoesNotExist:
+        logger.error(f"Subscription {subscription_id} not found")
+        return f"error: subscription {subscription_id} not found"
+    except Exception as exc:
+        logger.error(f"Error reactivating Stripe subscription {subscription_id}: {exc}")
+        raise self.retry(exc=exc)
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def update_stripe_subscription(self, subscription_id: int, new_plan_code: str) -> str:
+    """
+    Mettre à jour un abonnement Stripe vers un nouveau plan.
+    Les price IDs Stripe sont configurés via STRIPE_PRICE_IDS dans settings.py.
+    """
+    try:
+        import stripe
+        from django.conf import settings
+
+        subscription = Subscription.objects.get(id=subscription_id)
+
+        if not subscription.stripe_subscription_id:
+            logger.info(
+                f"Subscription {subscription_id} has no Stripe ID — skipping Stripe plan update"
+            )
+            return "skipped: no stripe subscription ID"
+
+        stripe_price_ids: dict = getattr(settings, "STRIPE_PRICE_IDS", {})
+        price_id = stripe_price_ids.get(new_plan_code)
+
+        if not price_id:
+            logger.warning(
+                f"No Stripe price ID configured for plan '{new_plan_code}' — skipping Stripe update"
+            )
+            return f"skipped: no price ID configured for plan {new_plan_code}"
+
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        stripe_sub = stripe.Subscription.retrieve(subscription.stripe_subscription_id)
+        current_item_id = stripe_sub["items"]["data"][0]["id"]
+
+        stripe.Subscription.modify(
+            subscription.stripe_subscription_id,
+            items=[{"id": current_item_id, "price": price_id}],
+            proration_behavior="create_prorations",
+        )
+        logger.info(
+            f"Stripe subscription {subscription.stripe_subscription_id} updated to plan {new_plan_code}"
+        )
+        return f"updated stripe sub {subscription.stripe_subscription_id} to {new_plan_code}"
+
+    except Subscription.DoesNotExist:
+        logger.error(f"Subscription {subscription_id} not found")
+        return f"error: subscription {subscription_id} not found"
+    except Exception as exc:
+        logger.error(f"Error updating Stripe subscription {subscription_id}: {exc}")
+        raise self.retry(exc=exc)
+
+
 @shared_task
 def check_expired_subscriptions():
     """

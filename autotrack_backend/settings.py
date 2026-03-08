@@ -286,6 +286,13 @@ STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
 STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='')
 STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
 
+# Stripe Price IDs (configure in .env for each plan)
+# Used by subscriptions.tasks.update_stripe_subscription
+STRIPE_PRICE_IDS = {
+    'standard': config('STRIPE_PRICE_ID_STANDARD', default=''),
+    'premium': config('STRIPE_PRICE_ID_PREMIUM', default=''),
+}
+
 # OpenAI Settings
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
 

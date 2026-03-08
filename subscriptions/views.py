@@ -229,9 +229,8 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
         subscription.cancel_at_period_end = True
         subscription.save()
         
-        # TODO: Cancel Stripe subscription via Celery
-        # from subscriptions.tasks import cancel_stripe_subscription
-        # cancel_stripe_subscription.delay(subscription.id)
+        from subscriptions.tasks import cancel_stripe_subscription
+        cancel_stripe_subscription.delay(subscription.id)
         
         serializer = self.get_serializer(subscription)
         return Response(serializer.data)
@@ -281,9 +280,8 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
         subscription.cancel_at_period_end = False
         subscription.save()
         
-        # TODO: Reactivate Stripe subscription via Celery
-        # from subscriptions.tasks import reactivate_stripe_subscription
-        # reactivate_stripe_subscription.delay(subscription.id)
+        from subscriptions.tasks import reactivate_stripe_subscription
+        reactivate_stripe_subscription.delay(subscription.id)
         
         serializer = self.get_serializer(subscription)
         return Response(serializer.data)
@@ -326,9 +324,8 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
         subscription.plan_name = new_plan_name
         subscription.save()
         
-        # TODO: Update Stripe subscription via Celery
-        # from subscriptions.tasks import update_stripe_subscription
-        # update_stripe_subscription.delay(subscription.id, new_plan.id)
+        from subscriptions.tasks import update_stripe_subscription
+        update_stripe_subscription.delay(subscription.id, new_plan_code)
         
         serializer = self.get_serializer(subscription)
         return Response(serializer.data)

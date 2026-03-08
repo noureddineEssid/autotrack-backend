@@ -28,5 +28,9 @@ COPY . /app/
 # Collect static files
 RUN python manage.py collectstatic --noinput || true
 
+# Create and switch to non-root user for security
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+USER appuser
+
 # Run migrations and start server
 CMD ["sh", "-c", "python manage.py migrate && gunicorn autotrack_backend.wsgi:application --bind 0.0.0.0:8000"]
