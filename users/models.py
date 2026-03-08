@@ -58,8 +58,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     password_reset_token_expiration = models.DateTimeField(blank=True, null=True)
     
     # OTP for 2FA
-    code_otp = models.CharField(max_length=6, blank=True, null=True)
+    code_otp = models.CharField(max_length=128, blank=True, null=True)  # stored as HMAC hash
     expire_otp = models.DateTimeField(blank=True, null=True)
+    otp_attempts = models.PositiveSmallIntegerField(default=0)
+    otp_locked_until = models.DateTimeField(blank=True, null=True)
     
     # Roles
     roles = models.JSONField(default=list, blank=True)
