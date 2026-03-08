@@ -18,7 +18,7 @@ class UserAdmin(BaseUserAdmin):
         ('Stripe', {'fields': ('stripe_customer_id',)}),
         ('Verification', {'fields': ('email_verified', 'code_otp', 'expire_otp')}),
         ('Password Reset', {'fields': ('password_reset_token', 'password_reset_token_expiration')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'roles', 'groups', 'user_permissions')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Dates', {'fields': ('created_at', 'updated_at')}),
     )
     

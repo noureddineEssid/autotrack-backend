@@ -16,7 +16,6 @@ class Command(BaseCommand):
             'first_name': 'Nabil',
             'last_name': 'Kharroubi',
             'phone_number': '+21620123456',
-            'roles': ['admin'],
             'email_verified': True,
         }
 
@@ -26,7 +25,6 @@ class Command(BaseCommand):
                 'first_name': 'Amal',
                 'last_name': 'Ben Ali',
                 'phone_number': '+21622111222',
-                'roles': ['user'],
                 'email_verified': True,
             },
             {
@@ -34,7 +32,6 @@ class Command(BaseCommand):
                 'first_name': 'Youssef',
                 'last_name': 'Chaari',
                 'phone_number': '+21623111333',
-                'roles': ['user'],
                 'email_verified': True,
             },
             {
@@ -42,7 +39,6 @@ class Command(BaseCommand):
                 'first_name': 'Salma',
                 'last_name': 'Trabelsi',
                 'phone_number': '+21624111444',
-                'roles': ['user'],
                 'email_verified': True,
             },
         ]

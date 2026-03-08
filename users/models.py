@@ -38,12 +38,6 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     """Custom User model"""
     
-    ROLE_CHOICES = [
-        ('user', 'User'),
-        ('admin', 'Admin'),
-        ('garage_owner', 'Garage Owner'),
-    ]
-    
     email = models.EmailField(unique=True, db_index=True)
     username = models.CharField(max_length=150, unique=True, blank=True, null=True)
     first_name = models.CharField(max_length=150)
@@ -62,9 +56,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     expire_otp = models.DateTimeField(blank=True, null=True)
     otp_attempts = models.PositiveSmallIntegerField(default=0)
     otp_locked_until = models.DateTimeField(blank=True, null=True)
-    
-    # Roles
-    roles = models.JSONField(default=list, blank=True)
     
     # Email verification
     email_verified = models.BooleanField(default=False)
@@ -96,10 +87,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"
     
-    def has_role(self, role):
-        """Check if user has a specific role"""
-        return role in self.roles if self.roles else False
-
 
 class Session(models.Model):
     """User session model"""
