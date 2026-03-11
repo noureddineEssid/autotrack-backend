@@ -78,61 +78,6 @@ class DatabaseHealthView(APIView):
             }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 
-class StripeHealthView(APIView):
-    """
-    Health check pour l'API Stripe
-    GET /api/health/stripe/
-    """
-    permission_classes = [AllowAny]
-    
-    def get(self, request):
-        try:
-            stripe_key = settings.STRIPE_SECRET_KEY
-            
-            if not stripe_key:
-                return Response({
-                    'status': 'warning',
-                    'stripe': 'not_configured',
-                    'message': 'Stripe API key not configured'
-                })
-            
-            # Test Stripe API connectivity
-            headers = {
-                'Authorization': f'Bearer {stripe_key}'
-            }
-            
-            response = requests.get(
-                'https://api.stripe.com/v1/charges',
-                headers=headers,
-                params={'limit': 1},
-                timeout=5
-            )
-            
-            if response.status_code == 200:
-                return Response({
-                    'status': 'healthy',
-                    'stripe': 'connected',
-                    'api_version': response.headers.get('Stripe-Version', 'unknown')
-                })
-            else:
-                return Response({
-                    'status': 'unhealthy',
-                    'stripe': 'error',
-                    'http_status': response.status_code
-                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-                
-        except requests.exceptions.Timeout:
-            return Response({
-                'status': 'unhealthy',
-                'stripe': 'timeout',
-                'error': 'Request timeout after 5 seconds'
-            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        except Exception as e:
-            return Response({
-                'status': 'unhealthy',
-                'stripe': 'error',
-                'error': str(e)
-            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 
 class RedisHealthView(APIView):

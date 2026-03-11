@@ -17,21 +17,6 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 # Celery Beat Schedule - Tâches périodiques
 app.conf.beat_schedule = {
-    # Vérifier les abonnements expirés - tous les jours à 00:00
-    'check-expired-subscriptions': {
-        'task': 'subscriptions.tasks.check_expired_subscriptions',
-        'schedule': crontab(hour=0, minute=0),
-    },
-    # Envoyer rappels renouvellement - tous les jours à 09:00
-    'send-renewal-reminders': {
-        'task': 'subscriptions.tasks.send_renewal_reminders',
-        'schedule': crontab(hour=9, minute=0),
-    },
-    # Mettre à jour statuts abonnements - toutes les heures
-    'update-subscription-statuses': {
-        'task': 'subscriptions.tasks.update_subscription_statuses',
-        'schedule': crontab(minute=0),  # Toutes les heures à la minute 0
-    },
     # Nettoyer anciennes sessions - tous les jours à 02:00
     'clean-expired-sessions': {
         'task': 'users.tasks.clean_expired_sessions',

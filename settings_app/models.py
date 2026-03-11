@@ -32,7 +32,6 @@ class UserSettings(models.Model):
     email_notifications = models.BooleanField(default=True)
     push_notifications = models.BooleanField(default=True)
     maintenance_reminders = models.BooleanField(default=True)
-    subscription_alerts = models.BooleanField(default=True)
     
     # Privacy
     profile_public = models.BooleanField(default=False)

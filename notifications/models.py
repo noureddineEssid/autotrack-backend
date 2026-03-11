@@ -11,7 +11,6 @@ class Notification(models.Model):
         ('success', 'Success'),
         ('error', 'Error'),
         ('maintenance_reminder', 'Maintenance Reminder'),
-        ('subscription_expiring', 'Subscription Expiring'),
     ]
     
     user = models.ForeignKey(

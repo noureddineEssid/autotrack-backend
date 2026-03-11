@@ -49,15 +49,6 @@ class Command(BaseCommand):
                     link='/maintenances',
                 )
             )
-            notifications_created.append(
-                Notification.objects.create(
-                    user=user,
-                    title='Abonnement actif',
-                    message='Votre abonnement est en cours. Consultez les limites de votre plan.',
-                    notification_type='info',
-                    is_read=False,
-                    link='/subscriptions',
-                )
-            )
+
 
         self.stdout.write(self.style.SUCCESS(f'✅ Created {len(notifications_created)} notifications'))

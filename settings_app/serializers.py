@@ -10,7 +10,7 @@ class UserSettingsSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', 'language', 'theme', 'timezone',
             'email_notifications', 'push_notifications',
-            'maintenance_reminders', 'subscription_alerts',
+            'maintenance_reminders',
             'profile_public', 'custom_settings',
             'created_at', 'updated_at'
         ]
@@ -25,6 +25,6 @@ class UserSettingsUpdateSerializer(serializers.ModelSerializer):
         fields = [
             'language', 'theme', 'timezone',
             'email_notifications', 'push_notifications',
-            'maintenance_reminders', 'subscription_alerts',
+            'maintenance_reminders',
             'profile_public', 'custom_settings'
         ]

@@ -103,19 +103,3 @@ class EmailService:
         email.attach_alternative(html_content, "text/html")
         email.send()
     
-    @staticmethod
-    def send_subscription_email(to_email, subject, template_name, context):
-        """
-        Envoie un email lié à l'abonnement
-        """
-        html_content = render_to_string(f'emails/{template_name}.html', context)
-        text_content = strip_tags(html_content)
-        
-        email = EmailMultiAlternatives(
-            subject=subject,
-            body=text_content,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[to_email]
-        )
-        email.attach_alternative(html_content, "text/html")
-        email.send()

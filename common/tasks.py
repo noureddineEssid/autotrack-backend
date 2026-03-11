@@ -13,73 +13,6 @@ logger = logging.getLogger(__name__)
 email_service = EmailService()
 
 
-@shared_task(name='subscriptions.check_expired_subscriptions')
-def check_expired_subscriptions():
-    """
-    Vérifie et désactive les abonnements expirés
-    Cette tâche doit être exécutée quotidiennement
-    """
-    from subscriptions.models import Subscription
-    
-    logger.info("Checking for expired subscriptions...")
-    
-    # Trouver les abonnements actifs qui ont expiré
-    expired_subscriptions = Subscription.objects.filter(
-        status='active',
-        end_date__lte=timezone.now()
-    )
-    
-    count = 0
-    for subscription in expired_subscriptions:
-        # Mettre à jour le statut
-        subscription.status = 'expired'
-        subscription.save(update_fields=['status'])
-        
-        # Envoyer un email de notification
-        email_service.send_subscription_expired_email(
-            user=subscription.user,
-            plan_name=subscription.plan.name
-        )
-        
-        count += 1
-    
-    logger.info(f"Marked {count} subscriptions as expired")
-    return {'expired_count': count}
-
-
-@shared_task(name='subscriptions.send_renewal_reminders')
-def send_renewal_reminders():
-    """
-    Envoie des rappels de renouvellement 7 jours avant l'expiration
-    Cette tâche doit être exécutée quotidiennement
-    """
-    from subscriptions.models import Subscription
-    
-    logger.info("Sending renewal reminders...")
-    
-    # Date dans 7 jours
-    reminder_date = timezone.now() + timedelta(days=7)
-    
-    # Trouver les abonnements qui expirent dans 7 jours
-    upcoming_renewals = Subscription.objects.filter(
-        status='active',
-        end_date__date=reminder_date.date(),
-        auto_renew=True
-    )
-    
-    count = 0
-    for subscription in upcoming_renewals:
-        # Envoyer l'email de rappel
-        email_service.send_subscription_renewal_reminder(
-            user=subscription.user,
-            plan_name=subscription.plan.name,
-            renewal_date=subscription.end_date
-        )
-        
-        count += 1
-    
-    logger.info(f"Sent {count} renewal reminders")
-    return {'reminder_count': count}
 
 
 @shared_task(name='maintenances.send_maintenance_reminders')
@@ -185,14 +118,12 @@ def check_system_health():
     Cette tâche doit être exécutée toutes les heures
     """
     from django.db import connection
-    import stripe
     from django.conf import settings
     
     logger.info("Checking system health...")
     
     health_status = {
         'database': False,
-        'stripe': False,
         'timestamp': timezone.now().isoformat()
     }
     
@@ -204,14 +135,6 @@ def check_system_health():
     except Exception as e:
         logger.error(f"Database health check failed: {str(e)}")
     
-    # Check Stripe
-    try:
-        if settings.STRIPE_SECRET_KEY:
-            stripe.api_key = settings.STRIPE_SECRET_KEY
-            stripe.Price.list(limit=1)
-            health_status['stripe'] = True
-    except Exception as e:
-        logger.error(f"Stripe health check failed: {str(e)}")
     
     # Si tout est OK
     if all(health_status.values()):

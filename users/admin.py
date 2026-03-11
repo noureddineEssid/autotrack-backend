@@ -15,7 +15,6 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal Info', {'fields': ('username', 'first_name', 'last_name', 'phone_number')}),
-        ('Stripe', {'fields': ('stripe_customer_id',)}),
         ('Verification', {'fields': ('email_verified', 'code_otp', 'expire_otp')}),
         ('Password Reset', {'fields': ('password_reset_token', 'password_reset_token_expiration')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),

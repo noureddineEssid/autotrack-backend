@@ -41,7 +41,6 @@ class Command(BaseCommand):
                 email_notifications=True,
                 push_notifications=True,
                 maintenance_reminders=True,
-                subscription_alerts=True,
                 profile_public=False,
             )
 

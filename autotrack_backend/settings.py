@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'maintenances',
     'garages',
     'diagnostics',
-    'subscriptions',
     'documents',
     'notifications',
     'webhooks',
@@ -281,17 +280,6 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@autotrack.com')
 EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=10, cast=int)
 
-# Stripe Settings
-STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
-STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='')
-STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
-
-# Stripe Price IDs (configure in .env for each plan)
-# Used by subscriptions.tasks.update_stripe_subscription
-STRIPE_PRICE_IDS = {
-    'standard': config('STRIPE_PRICE_ID_STANDARD', default=''),
-    'premium': config('STRIPE_PRICE_ID_PREMIUM', default=''),
-}
 
 # OpenAI Settings
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
@@ -308,16 +296,6 @@ CELERY_TIMEZONE = TIME_ZONE
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
-    # Vérifier les abonnements expirés tous les jours à 2h du matin
-    'check-expired-subscriptions': {
-        'task': 'subscriptions.check_expired_subscriptions',
-        'schedule': crontab(hour=2, minute=0),
-    },
-    # Envoyer les rappels de renouvellement tous les jours à 9h
-    'send-renewal-reminders': {
-        'task': 'subscriptions.send_renewal_reminders',
-        'schedule': crontab(hour=9, minute=0),
-    },
     # Envoyer les rappels de maintenance tous les jours à 10h
     'send-maintenance-reminders': {
         'task': 'maintenances.send_maintenance_reminders',

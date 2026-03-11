@@ -101,50 +101,6 @@ class EmailService:
         )
     
     @classmethod
-    def send_subscription_confirmation_email(cls, user, plan_name, amount):
-        """Envoie la confirmation d'abonnement"""
-        return cls.send_email(
-            subject='Confirmation de votre abonnement AutoTrack',
-            template_name='subscription-confirmation',
-            context={
-                'user_name': user.first_name or user.email.split('@')[0],
-                'plan_name': plan_name,
-                'amount': f"{amount}€",
-                'dashboard_url': f"{settings.FRONTEND_URL}/dashboard"
-            },
-            recipient_email=user.email
-        )
-    
-    @classmethod
-    def send_subscription_renewal_reminder(cls, user, plan_name, renewal_date):
-        """Envoie un rappel de renouvellement d'abonnement"""
-        return cls.send_email(
-            subject='Rappel: Renouvellement de votre abonnement AutoTrack',
-            template_name='subscription-renewal',
-            context={
-                'user_name': user.first_name or user.email.split('@')[0],
-                'plan_name': plan_name,
-                'renewal_date': renewal_date.strftime('%d/%m/%Y'),
-                'manage_url': f"{settings.FRONTEND_URL}/dashboard/subscription"
-            },
-            recipient_email=user.email
-        )
-    
-    @classmethod
-    def send_subscription_expired_email(cls, user, plan_name):
-        """Envoie la notification d'expiration d'abonnement"""
-        return cls.send_email(
-            subject='Votre abonnement AutoTrack a expiré',
-            template_name='subscription-expired',
-            context={
-                'user_name': user.first_name or user.email.split('@')[0],
-                'plan_name': plan_name,
-                'renew_url': f"{settings.FRONTEND_URL}/dashboard/subscription"
-            },
-            recipient_email=user.email
-        )
-    
-    @classmethod
     def send_maintenance_reminder_email(cls, user, vehicle, maintenance, days_left):
         """Envoie un rappel de maintenance programmée"""
         return cls.send_email(

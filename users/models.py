@@ -44,9 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=150)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     
-    # Stripe
-    stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
-    
+
     # Password reset
     password_reset_token = models.CharField(max_length=255, blank=True, null=True)
     password_reset_token_expiration = models.DateTimeField(blank=True, null=True)
@@ -78,7 +76,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['email']),
-            models.Index(fields=['stripe_customer_id']),
         ]
     
     def __str__(self):

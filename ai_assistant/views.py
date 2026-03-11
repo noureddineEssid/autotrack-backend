@@ -10,7 +10,6 @@ from .serializers import (
     AIMessageSerializer, AIMessageCreateSerializer
 )
 from .ai_service import ai_service
-from common.permissions import IsStandardPlan, IsPremiumPlan
 
 
 class AIConversationViewSet(viewsets.ModelViewSet):
@@ -130,10 +129,10 @@ class AIAssistantViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
     
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsStandardPlan])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def chat(self, request):
         """
-        Chat général avec l'assistant IA - Plan STANDARD minimum
+        Chat général avec l'assistant IA
         
         Body: {
             "message": "Votre message",
@@ -161,10 +160,10 @@ class AIAssistantViewSet(viewsets.ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsStandardPlan])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def maintenance_suggestions(self, request):
         """
-        Obtenir des suggestions de maintenance préventive - Plan STANDARD minimum
+        Obtenir des suggestions de maintenance préventive
         
         Body: {
             "vehicleInfo": {
@@ -207,10 +206,10 @@ class AIAssistantViewSet(viewsets.ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsPremiumPlan])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def diagnostic(self, request):
         """
-        Diagnostic d'un problème - Plan PREMIUM minimum
+        Diagnostic d'un problème
         Nécessite des analyses plus avancées
         
         Body: {
@@ -251,10 +250,10 @@ class AIAssistantViewSet(viewsets.ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsStandardPlan])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def maintenance_ask(self, request):
         """
-        Questions sur la maintenance - Plan STANDARD minimum
+        Questions sur la maintenance
         
         Body: {
             "question": "Quand dois-je changer l'huile?",
