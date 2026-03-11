@@ -2,10 +2,10 @@
 
 ## Vue d'ensemble
 
-AutoTrack est une plateforme complète de gestion de flotte automobile divisée en **16 modules fonctionnels** (14 opérationnels + 2 utilitaires) couvrant tous les aspects de la maintenance, du suivi et de la gestion des véhicules.
+AutoTrack est une plateforme complète de gestion de flotte automobile divisée en **14 modules fonctionnels** (13 opérationnels + 1 partiel) couvrant tous les aspects de la maintenance, du suivi et de la gestion des véhicules.
 
 **Dernière mise à jour:** 23 Janvier 2026  
-**Status global:** 14/14 modules opérationnels (100%)  
+**Status global:** 13/13 modules opérationnels (100%)  
 
 ## 📊 Tableau récapitulatif des modules
 
@@ -22,9 +22,9 @@ AutoTrack est une plateforme complète de gestion de flotte automobile divisée 
 | 9 | Reminders | ✅ | ✅ | ✅ | ✅ Complet |
 | 10 | Bookings | ✅ | ✅ | ✅ | ✅ Complet |
 | 11 | Utilisateurs | ✅ | ✅ | ✅ | ✅ Complet |
-| 13 | Assistant IA | ✅ | ✅ | ✅ | ✅ Complet |
-| 14 | Paramètres | ✅ | ✅ | ✅ | ✅ Complet |
-| 15 | ML Predictions | ✅ | ⏳ | ⏳ | ⏳ Backend only |
+| 12 | Assistant IA | ✅ | ✅ | ✅ | ✅ Complet |
+| 13 | Paramètres | ✅ | ✅ | ✅ | ✅ Complet |
+| 14 | ML Predictions | ✅ | ⏳ | ⏳ | ⏳ Backend only |
 | - | Health (utilitaire) | ✅ | - | - | ✅ Backend only |
 | - | Common (utilitaire) | ✅ | - | - | ✅ Backend only |
 
@@ -802,7 +802,7 @@ GET /api/health/        # Status système
 **Plateformes:** Backend ✅
 
 #### Fonctionnalités:
-- Webhooks Stripe (paiements, abonnements)
+- Webhooks entrants
 - Signatures validation
 - Event processing
 - Retry mechanism
@@ -812,14 +812,13 @@ GET /api/health/        # Status système
 ## 📈 Statistiques Globales du Projet
 
 ### Couverture Backend:
-- **16 apps Django** (14 fonctionnelles + 2 utilitaires)
+- **14 apps Django** (13 fonctionnelles + 1 partiel)
 - **60+ models** avec relations complexes
 - **200+ endpoints API** (ViewSets + actions custom)
 - **20+ Celery tasks** périodiques
 - **3 générateurs** de rapports (PDF, Excel, CSV)
 - **JWT + OTP** authentication
 - **PostGIS** géolocalisation
-- **Stripe** paiements & webhooks
 - **OpenAI** assistant IA
 - **ML Stack** (numpy, scikit-learn, joblib)
 
@@ -854,8 +853,6 @@ GET /api/health/        # Status système
 | reports | 1 | 2 | 6 | 1 | ✅ |
 | bookings | 2 | 2 | 7 | 2 | ✅ |
 | users | 1 | 1 | 8 | 0 | ✅ |
-| subscriptions | 1 | 1 | 5 | 0 | ✅ |
-| plans | 1 | 1 | 3 | 0 | ✅ |
 | ai_assistant | 1 | 1 | 4 | 0 | ✅ |
 | settings_app | 1 | 1 | 3 | 0 | ✅ |
 | ml_predictions | 5 | 6 | 15 | 6 | ✅ Backend |
@@ -863,7 +860,7 @@ GET /api/health/        # Status système
 | health | 0 | 1 | 1 | 0 | ✅ |
 | common | 0 | 0 | 0 | 0 | ✅ |
 | emails | 0 | 0 | 0 | 0 | ✅ |
-| **TOTAL** | **24** | **28** | **116** | **15** | - |
+| **TOTAL** | **22** | **26** | **108** | **15** | - |
 ---
 
 ### Couverture Mobile:
@@ -888,8 +885,6 @@ GET /api/health/        # Status système
 | reports | 1 | 2 | 6 | 1 | ✅ |
 | bookings | 2 | 2 | 7 | 2 | ✅ |
 | users | 1 | 1 | 8 | 0 | ✅ |
-| subscriptions | 1 | 1 | 5 | 0 | ✅ |
-| plans | 1 | 1 | 3 | 0 | ✅ |
 | ai_assistant | 1 | 1 | 4 | 0 | ✅ |
 | settings_app | 1 | 1 | 3 | 0 | ✅ |
 | ml_predictions | 5 | 6 | 15 | 6 | ✅ Backend |
@@ -897,7 +892,7 @@ GET /api/health/        # Status système
 | health | 0 | 1 | 1 | 0 | ✅ |
 | common | 0 | 0 | 0 | 0 | ✅ |
 | emails | 0 | 0 | 0 | 0 | ✅ |
-| **TOTAL** | **24** | **28** | **116** | **15** | - |
+| **TOTAL** | **22** | **26** | **108** | **15** | - |
 
 ---
 
@@ -1019,7 +1014,6 @@ djangorestframework-simplejwt==5.5.1
 psycopg2-binary==2.9.11
 celery==5.6.2
 redis==7.1.0
-stripe==14.2.0
 openai==2.15.0
 numpy==1.26.4
 scikit-learn==1.4.2
@@ -1054,7 +1048,7 @@ openpyxl==3.1.5 (implied)
 
 ## 🎯 État d'Avancement Global
 
-### ✅ Modules Complets (14/16):
+### ✅ Modules Complets (13/14):
 1. ✅ Véhicules - CRUD complet 3 plateformes
 2. ✅ Entretiens - Planification + historique
 3. ✅ Documents - Upload + OCR + expiration
@@ -1066,31 +1060,30 @@ openpyxl==3.1.5 (implied)
 9. ✅ Rapports - PDF/Excel/CSV générateurs
 10. ✅ Bookings - Réservations garage + slots
 11. ✅ Users - Auth JWT + OTP 2FA
-12. ✅ Subscriptions/Plans - Stripe + webhooks
-13. ✅ AI Assistant - OpenAI GPT-4 chat
-14. ✅ Settings - Préférences app
+12. ✅ AI Assistant - OpenAI GPT-4 chat
+13. ✅ Settings - Préférences app
 
-### ⏳ Modules Partiels (1/16):
-15. ⏳ ML Predictions - Backend ✅ | Frontend ⏳ | Mobile ⏳
+### ⏳ Modules Partiels (1/14):
+14. ⏳ ML Predictions - Backend ✅ | Frontend ⏳ | Mobile ⏳
 
 ### ✅ Modules Utilitaires (5/5):
 - ✅ Health - Monitoring
 - ✅ Common - Utils partagés
 - ✅ Emails - Templates
-- ✅ Webhooks - Stripe events
+- ✅ Webhooks - Events entrants
 - ✅ autotrack_backend - Configuration Django
 
 ### Progression Totale:
-- **Backend:** 100% (20/20 apps fonctionnelles)
-- **Frontend:** 93% (14/15 modules dashboard)
-- **Mobile:** 93% (14/15 screens principaux)
-- **Global:** 95% (14 modules complets, 1 partiel)
+- **Backend:** 100% (18/18 apps fonctionnelles)
+- **Frontend:** 93% (13/14 modules dashboard)
+- **Mobile:** 93% (13/14 screens principaux)
+- **Global:** 95% (13 modules complets, 1 partiel)
 
 ---
 
 **Dernière mise à jour:** 23 Janvier 2026  
 **Version Documentation:** 3.0.0  
-**Modules actifs:** 14/14 complets + 1 backend-only (ML)  
+**Modules actifs:** 13/13 complets + 1 backend-only (ML)  
 **Total endpoints API:** 200+  
 **Total lignes code backend:** ~15,000+ lignes  
 **Total composants frontend:** 50+  

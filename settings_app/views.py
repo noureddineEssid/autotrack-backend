@@ -65,7 +65,6 @@ class UserSettingsViewSet(viewsets.ModelViewSet):
         settings.email_notifications = True
         settings.push_notifications = True
         settings.maintenance_reminders = True
-        settings.subscription_alerts = True
         settings.profile_public = False
         settings.custom_settings = {}
         settings.save()

@@ -20,7 +20,7 @@ class UserSettingsAdmin(admin.ModelAdmin):
         }),
         ('Notification Preferences', {
             'fields': ('email_notifications', 'push_notifications',
-                      'maintenance_reminders', 'subscription_alerts')
+                      'maintenance_reminders')
         }),
         ('Privacy', {
             'fields': ('profile_public',)

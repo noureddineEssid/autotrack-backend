@@ -61,7 +61,7 @@ class Command(BaseCommand):
             if not vehicles:
                 continue
 
-            # Current month maintenances (respect plan limits)
+            # Current month maintenances
             for i in range(monthly_targets[email]):
                 vehicle = vehicles[i % len(vehicles)]
                 service_date = now - timedelta(days=(i % 20))
