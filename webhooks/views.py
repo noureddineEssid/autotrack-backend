@@ -9,7 +9,6 @@ from django.conf import settings
 from .models import WebhookEvent
 from .serializers import WebhookEventSerializer
 import json
-import stripe
 
 
 class WebhookEventViewSet(viewsets.ModelViewSet):

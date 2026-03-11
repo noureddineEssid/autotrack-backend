@@ -40,9 +40,9 @@ class Command(BaseCommand):
             return
 
         monthly_targets = {
-            'amal.benali@example.com': 4,     # free (<= 10)
-            'youssef.chaari@example.com': 12,  # standard (<= 50)
-            'salma.trabelsi@example.com': 25,  # premium (<= 200)
+            'amal.benali@example.com': 15,
+            'youssef.chaari@example.com': 15,
+            'salma.trabelsi@example.com': 15,
         }
 
         service_types = [

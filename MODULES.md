@@ -22,7 +22,6 @@ AutoTrack est une plateforme complète de gestion de flotte automobile divisée 
 | 9 | Reminders | ✅ | ✅ | ✅ | ✅ Complet |
 | 10 | Bookings | ✅ | ✅ | ✅ | ✅ Complet |
 | 11 | Utilisateurs | ✅ | ✅ | ✅ | ✅ Complet |
-| 12 | Abonnements | ✅ | ✅ | ✅ | ✅ Complet |
 | 13 | Assistant IA | ✅ | ✅ | ✅ | ✅ Complet |
 | 14 | Paramètres | ✅ | ✅ | ✅ | ✅ Complet |
 | 15 | ML Predictions | ✅ | ⏳ | ⏳ | ⏳ Backend only |
@@ -568,24 +567,6 @@ bookings/
 
 ---
 
-### 13. **Abonnements** (`subscriptions` + `plans`)
-**Status:** ✅ Opérationnel  
-**Plateformes:** Backend ✅ | Frontend ✅ | Mobile ✅
-
-#### Fonctionnalités:
-- 3 plans: Free, Pro, Enterprise
-- Stripe checkout intégré
-- Gestion facturation
-- Limitations par plan
-- Upgrade/downgrade
-- Webhooks Stripe
-
-#### Stack technique:
-- **Backend:** stripe, django webhooks (app `webhooks`)
-- **Frontend:** Stripe Elements, customer portal (app/dashboard/subscription)
-- **Mobile:** In-app purchase (iOS) + Stripe (src/screens/SubscriptionScreen)
-
----
 
 ## 🤖 Modules Avancés
 

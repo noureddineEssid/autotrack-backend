@@ -42,9 +42,9 @@ class Command(BaseCommand):
             return
 
         monthly_targets = {
-            'amal.benali@example.com': 3,      # free (<= 5)
-            'youssef.chaari@example.com': 10,  # standard (<= 30)
-            'salma.trabelsi@example.com': 20,  # premium (unlimited)
+            'amal.benali@example.com': 10,
+            'youssef.chaari@example.com': 10,
+            'salma.trabelsi@example.com': 10,
         }
 
         diagnostic_scenarios = [

@@ -90,7 +90,7 @@ class Command(BaseCommand):
             return
 
         vehicles_data = [
-            # Free plan user (<= 3 vehicles)
+            # Utilisateur : Amal Benali
             {
                 'owner': users['amal.benali@example.com'],
                 'make': 'Renault',
@@ -113,7 +113,7 @@ class Command(BaseCommand):
                 'fuel_type': 'gasoline',
                 'transmission': 'automatic',
             },
-            # Standard plan user (<= 10 vehicles)
+            # Utilisateur : Youssef Chaari
             {
                 'owner': users['youssef.chaari@example.com'],
                 'make': 'Peugeot',
@@ -169,7 +169,7 @@ class Command(BaseCommand):
                 'fuel_type': 'diesel',
                 'transmission': 'automatic',
             },
-            # Premium plan user (unlimited vehicles, seeded with 8)
+            # Utilisateur : Salma Trabelsi
             {
                 'owner': users['salma.trabelsi@example.com'],
                 'make': 'BMW',

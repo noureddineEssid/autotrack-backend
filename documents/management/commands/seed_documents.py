@@ -37,9 +37,9 @@ class Command(BaseCommand):
             return
 
         plan_document_targets = {
-            'amal.benali@example.com': 12,     # free (<= 50)
-            'youssef.chaari@example.com': 40,  # standard (<= 200)
-            'salma.trabelsi@example.com': 80,  # premium (<= 1000)
+            'amal.benali@example.com': 30,
+            'youssef.chaari@example.com': 30,
+            'salma.trabelsi@example.com': 30,
         }
 
         doc_templates = [
