@@ -10,7 +10,6 @@ Ce projet est la version Django REST API du backend Autotrack, converti depuis N
 - **Base de données**: PostgreSQL (avec support SQLite pour développement)
 - **Cache/Queue**: Redis
 - **Tâches asynchrones**: Celery
-- **Paiements**: Stripe
 - **IA**: OpenAI API
 - **OCR**: Tesseract
 
@@ -112,11 +111,7 @@ autotrack-backend/
 ├── maintenances/              # Application maintenances
 ├── garages/                   # Application garages
 ├── diagnostics/               # Application diagnostics
-├── subscriptions/             # Application abonnements
-├── plans/                     # Application plans tarifaires
-├── documents/                 # Application documents
 ├── notifications/             # Application notifications
-├── webhooks/                  # Webhooks Stripe
 ├── settings_app/              # Paramètres utilisateur
 ├── ai_assistant/              # Assistant IA
 ├── manage.py                  # CLI Django
@@ -126,7 +121,7 @@ autotrack-backend/
 ## 🔑 Modèles de Données
 
 ### Users
-- **User**: Utilisateur avec authentification JWT, OTP, Stripe
+- **User**: Utilisateur avec authentification JWT, OTP
 - **Session**: Sessions utilisateur
 
 ### Vehicles
@@ -141,13 +136,6 @@ autotrack-backend/
 - **Garage**: Garage avec géolocalisation
 - **GarageReview**: Avis sur les garages
 
-### Plans & Subscriptions
-- **Plan**: Plan d'abonnement
-- **PlanFeature**: Fonctionnalités des plans
-- **PlanFeatureValue**: Valeurs des fonctionnalités
-- **Subscription**: Abonnement utilisateur
-- **SubscriptionHistory**: Historique des changements
-
 ### Documents
 - **Document**: Documents avec OCR
 
@@ -161,9 +149,6 @@ autotrack-backend/
 ### AI Assistant
 - **AIConversation**: Conversation avec IA
 - **AIMessage**: Messages de conversation
-
-### Webhooks
-- **StripeEvent**: Événements webhook Stripe
 
 ## 🔌 API Endpoints
 
@@ -206,7 +191,6 @@ Les tâches suivantes peuvent être implémentées :
 - Envoi d'emails
 - Rappels de maintenance
 - Traitement OCR de documents
-- Synchronisation Stripe
 - Nettoyage des sessions expirées
 
 ## 🔄 Migration depuis NestJS
@@ -228,12 +212,11 @@ Ce projet a été converti depuis le projet NestJS `autotrack-backend-old`. Les 
 ## 🚧 TODO
 
 - [ ] Créer les views pour tous les modules
-- [ ] Implémenter les services (email, AI, Stripe)
+- [ ] Implémenter les services (email, AI)
 - [ ] Ajouter les tests unitaires
 - [ ] Configurer les tâches Celery
 - [ ] Ajouter la documentation Swagger/OpenAPI
 - [ ] Configurer Docker
-- [ ] Ajouter les webhooks Stripe
 - [ ] Implémenter les permissions personnalisées
 
 ## 📄 License
