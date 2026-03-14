@@ -281,8 +281,9 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@autotrack.com
 EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=10, cast=int)
 
 
-# OpenAI Settings
-OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+# Capgemini Generative Engine (agent LangGraph)
+GEP_API_KEY = config('GEP_API_KEY', default='')
+AGENT_MODEL = config('AGENT_MODEL', default='anthropic.claude-sonnet-4-6')
 
 # Celery Settings
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')

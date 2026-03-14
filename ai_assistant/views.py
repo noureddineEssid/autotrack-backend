@@ -149,7 +149,7 @@ class AIAssistantViewSet(viewsets.ViewSet):
             )
         
         try:
-            response = ai_service.chat(message, history)
+            response = ai_service.chat(message, history, user_id=request.user.id)
             return Response({
                 'content': response['content'],
                 'model': response['model']

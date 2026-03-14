@@ -1,8 +1,6 @@
 """
-Service IA pour AutoTrack - Équivalent du GenerativeEngineService NestJS
-Utilise OpenAI pour l'assistance automobile
+Service IA pour AutoTrack — Utilise l'agent LangGraph (ReAct) + Capgemini Generative Engine API
 """
-import openai
 from django.conf import settings
 from typing import List, Dict, Optional
 import json
@@ -13,76 +11,41 @@ logger = logging.getLogger(__name__)
 
 class AIService:
     """Service d'intelligence artificielle pour l'assistance automobile"""
-    
-    def __init__(self):
-        """Initialiser le service OpenAI"""
-        openai.api_key = settings.OPENAI_API_KEY
-        self.model = getattr(settings, 'OPENAI_MODEL', 'gpt-4o')
-        
-        if not openai.api_key:
-            logger.warning('OpenAI API key not configured. AI features will be disabled.')
-    
+
     def chat(
         self,
         message: str,
         conversation_history: Optional[List[Dict[str, str]]] = None,
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
+        user_id: Optional[int] = None,
     ) -> Dict[str, str]:
         """
-        Chat général avec l'IA en maintenant l'historique
-        
+        Chat général avec l'IA en maintenant l'historique.
+
         Args:
-            message: Message de l'utilisateur
-            conversation_history: Historique de conversation [{role: 'user/assistant', content: '...'}]
-            system_prompt: Prompt système optionnel
-            
+            message:              Message de l'utilisateur.
+            conversation_history: Historique [{'role': 'user'|'assistant', 'content': '...'}].
+            system_prompt:        Prompt système optionnel (surcharge le prompt AutoTrack).
+            user_id:              ID utilisateur Django (active les outils DB de l'agent).
+
         Returns:
-            Dict avec 'content' (réponse) et 'model' (modèle utilisé)
+            Dict avec 'content' (réponse) et 'model' (modèle utilisé).
         """
-        if not openai.api_key:
-            raise ValueError('OpenAI API key not configured')
-        
-        # Construire les messages
-        messages = []
-        
-        # Prompt système par défaut
-        if system_prompt:
-            messages.append({
-                'role': 'system',
-                'content': system_prompt
-            })
-        else:
-            messages.append({
-                'role': 'system',
-                'content': 'Tu es un assistant automobile expert qui aide les utilisateurs avec leurs véhicules.'
-            })
-        
-        # Ajouter l'historique
-        if conversation_history:
-            messages.extend(conversation_history)
-        
-        # Ajouter le message actuel
-        messages.append({
-            'role': 'user',
-            'content': message
-        })
-        
+        from agents.autotrack_agent import demander
+
         try:
-            # Appel à OpenAI
-            response = openai.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=0.7,
-                max_tokens=1000
+            response = demander(
+                question=message,
+                user_id=user_id,
+                history=conversation_history or [],
+                system_prompt=system_prompt,
             )
-            
             return {
-                'content': response.choices[0].message.content,
-                'model': response.model
+                'content': response,
+                'model': getattr(settings, 'AGENT_MODEL', 'anthropic.claude-sonnet-4-6'),
             }
-            
         except Exception as e:
-            logger.error(f'OpenAI API error: {str(e)}')
+            logger.error(f'Agent error: {str(e)}')
             raise
     
     def suggest_preventive_maintenance(
